@@ -1,7 +1,23 @@
-<!--Logo for desktop/larger screens, source is set in app.js-->
-<img alt="Days for Girls logo" id="desktop-header-logo" />
-<!--Logo for mobile/smaller screens, source is set in app.js-->
-<img alt="Days for Girls logo" id="mobile-header-logo" />
+<!--Logo for desktop/larger screens-->
+<picture>
+    <!--user's system is set to dark mode-->
+    <source srcset="https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/118ba9581c3181362ac952111e60637d3ddf1387/images/logo-light.svg" media="(prefers-color-scheme: light)" id="desktop-header-logo" />
+    <!--user's system is set to light mode-->
+    <source srcset="https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/118ba9581c3181362ac952111e60637d3ddf1387/images/logo-dark.svg" media="(prefers-color-scheme: dark)" id="desktop-header-logo" />
+    <!--no color preference found: use light mode-->
+    <img src="https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/118ba9581c3181362ac952111e60637d3ddf1387/images/logo-light.svg" alt="Days for Girls logo" id="desktop-header-logo" />
+</picture>
+<!--Logo for mobile/smaller screens-->
+<picture>
+    <!--user's system is set to dark mode-->
+    <source srcset="https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/118ba9581c3181362ac952111e60637d3ddf1387/images/mobile-logo-light.svg" media="(prefers-color-scheme: light)" id="mobile-header-logo"
+        class="light" />
+    <!--user's system is set to light mode-->
+    <source srcset="https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/118ba9581c3181362ac952111e60637d3ddf1387/images/mobile-logo-dark.svg" media="(prefers-color-scheme: dark)" id="mobile-header-logo"
+        class="dark" />
+    <!--no color preference found: use light mode-->
+    <img src="https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/118ba9581c3181362ac952111e60637d3ddf1387/images/mobile-logo-light.svg" alt="Days for Girls logo" id="mobile-header-logo" class="unknown" />
+</picture>
 <nav>
   <a href="index.html">Home</a>
   <a href="mailing-list.html">Mailing List</a>

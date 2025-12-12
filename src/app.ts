@@ -2,11 +2,9 @@ import {
   createMessage,
   closeModal,
   retrieveMessage,
-  trapFocus,
 } from "./utils";
 import {
   signInWithGooglePopup,
-  getCurrentUser,
   signOutUser,
 } from "./authService";
 import { auth } from "./firebase";
@@ -16,7 +14,7 @@ let mobileNavToggle = document.getElementById(
   "mobile-nav-toggle",
 ) as HTMLElement;
 const githubTemplateBaseURL =
-  "https://raw.githubusercontent.com/ryan-montville/days-for-girls-solon/refs/heads/main/";
+  "https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/refs/heads/main/";
 
 //Global DOM elements
 let nav: HTMLElement;
@@ -48,56 +46,6 @@ function setUpAuthListener() {
       signOutButton.style.display = "none";
     }
   });
-}
-
-function toggleDarkMode(prefersDarkMode: boolean) {
-  const rootElement = document.documentElement;
-  if (prefersDarkMode) {
-    rootElement.classList.add("dark");
-    rootElement.classList.remove("light");
-  } else {
-    rootElement.classList.add("light");
-    rootElement.classList.remove("dark");
-  }
-}
-
-function updateDarkModeButtonIcon(prefersDarkMode: boolean) {
-  //Get the dark mode toggle button
-  const darkModeToggleButton = document.getElementById(
-    "dark-mode-toggle",
-  ) as HTMLElement;
-  //Get the site logo, both for desktop and mobile
-  const desktopLogo = document.getElementById(
-    "desktop-header-logo",
-  ) as HTMLElement;
-  const mobileLogo = document.getElementById(
-    "mobile-header-logo",
-  ) as HTMLElement;
-  //Set the icon on the button and the logo image source
-  darkModeToggleButton.innerHTML = "";
-  if (prefersDarkMode) {
-    desktopLogo.setAttribute(
-      "src",
-      "https://raw.githubusercontent.com/ryan-montville/days-for-girls-solon/refs/heads/main/images/logo-dark.svg",
-    );
-    mobileLogo.setAttribute(
-      "src",
-      "https://raw.githubusercontent.com/ryan-montville/days-for-girls-solon/37a0850e4b3adb34bcfce8c022a76bd7747717fc/images/mobile-logo-dark.svg",
-    );
-    const iconName = document.createTextNode("dark_mode");
-    darkModeToggleButton.appendChild(iconName);
-  } else {
-    desktopLogo.setAttribute(
-      "src",
-      "https://raw.githubusercontent.com/ryan-montville/days-for-girls-solon/refs/heads/main/images/logo-light.svg",
-    );
-    mobileLogo.setAttribute(
-      "src",
-      "https://raw.githubusercontent.com/ryan-montville/days-for-girls-solon/37a0850e4b3adb34bcfce8c022a76bd7747717fc/images/mobile-logo-light.svg",
-    );
-    const iconName = document.createTextNode("light_mode");
-    darkModeToggleButton.appendChild(iconName);
-  }
 }
 
 export async function initializeApp(partentPage: string, currentPage: string) {
@@ -263,40 +211,6 @@ async function loadHeader(
       if (link.textContent === partentPage) {
         link.setAttribute("aria-current", "page");
       }
-    });
-    /* Dark Mode Toggle */
-    let prefersDarkMode: boolean = false;
-    //Check if dark mode preference is stored in session storage
-    const sessionStorageDarkMode = sessionStorage.getItem("darkMode");
-    if (sessionStorageDarkMode) {
-      //If it is stored, set prefersDarkMode
-      prefersDarkMode = JSON.parse(sessionStorageDarkMode);
-    } else {
-      //If it is not stored, check the device preference
-      const deviceDarkModePreference = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      if (deviceDarkModePreference) {
-        //If the app is able to read the device preference, set prefersDarkMode
-        prefersDarkMode = deviceDarkModePreference;
-      }
-    }
-    //Get the dark mode toggle button
-    const darkModeToggleButton = document.getElementById(
-      "dark-mode-toggle",
-    ) as HTMLElement;
-    //Set the button's icon
-    updateDarkModeButtonIcon(prefersDarkMode);
-    //Add an event listener
-    darkModeToggleButton.addEventListener("click", () => {
-      //Toggle prefersDarkMode
-      prefersDarkMode = !prefersDarkMode;
-      //Toggle the root class
-      toggleDarkMode(prefersDarkMode);
-      //Update the button's icon
-      updateDarkModeButtonIcon(prefersDarkMode);
-      //Set the new preference in session storage
-      sessionStorage.setItem("darkMode", JSON.stringify(prefersDarkMode));
     });
   } catch (error) {
     console.error(`Failed to load the header: ${error}`);
