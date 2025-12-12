@@ -52,56 +52,6 @@
   }
 }
 
-/* class overrides to toggle dark mode */
-:root.light {
-    --body-background: #e7e9f1;
-    --primary-accent: #cc7f00;
-    --primary-hover: #c45a00;
-    --secondary-accent: #006270;
-    --secondary-hover: #006a79;
-    --secondary-text: #fff;
-    --message-text: white;
-    --error-background: #b81f24;
-    --error-hover: #a51b20;
-    --success-background: green;
-    --delete-background: #fc6a03;
-    --nav-text: #4f4b4e;
-    --nav-hover: #f0f0f0;
-    --current-page-background:#64d9cc;
-    --current-page-background-hover: #80e5d5;
-    --current-page-text: #000;
-    --main-background: #fff;
-    --main-text: #000;
-    --table-header: #282834;
-    --footer-background: #676486;
-    --footer-text: #fff;
-}
-
-:root.dark {
-    --body-background: #000000;
-    --primary-accent: #cc7f00;
-    --primary-hover: #c45a00;
-    --secondary-accent: #006270;
-    --secondary-hover: #006a79;
-    --secondary-text: #ffffff;
-    --message-text: white;
-    --error-background: #b81f24;
-    --error-hover: #a51b20;
-    --success-background: green;
-    --delete-background: #fc6a03;
-    --error-text: #fff;
-    --nav-text: #ccc;
-    --nav-hover: #222222;
-    --current-page-background:#155650;
-    --current-page-background-hover: #175E57;
-    --current-page-text: #fff;
-    --main-background: #333;
-    --main-text: #ccc;
-    --table-header: #282834;
-    --footer-background: #676486;
-    --footer-text: #fff;
-  }
-
 /* CSS reset to remove default padding and margin */
 * {
   padding: 0;
@@ -239,10 +189,6 @@ nav a:hover {
 
 #google-login-button img {
   height: 25px;
-}
-
-#dark-mode-toggle {
-  background-color: transparent;
 }
 
 /* Modals */
