@@ -3,13 +3,13 @@ import {
   closeModal,
   retrieveMessage,
   trapFocus,
-} from "./utils.js";
+} from "./utils";
 import {
   signInWithGooglePopup,
   getCurrentUser,
   signOutUser,
-} from "./authService.js";
-import { auth } from "./firebase.js";
+} from "./authService";
+import { auth } from "./firebase";
 
 const pageWrapper = document.getElementById("page-wrapper") as HTMLElement;
 let mobileNavToggle = document.getElementById(

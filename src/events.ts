@@ -1,9 +1,9 @@
-import { initializeApp } from "./app.js";
-import { createMessage, fixDate } from "./utils.js";
-import { getAllEvents } from "./firebaseService.js";
-import { Event } from "./models.js";
-import { auth } from "./firebase.js";
-import { getUserRole } from "./authService.js";
+import { initializeApp } from "./app";
+import { createMessage, fixDate } from "./utils";
+import { getAllEvents } from "./firebaseService";
+import { Event } from "./models";
+import { auth } from "./firebase";
+import { getUserRole } from "./authService";
 
 //DOM elements
 let main = document.getElementById("maincontent") as HTMLElement;

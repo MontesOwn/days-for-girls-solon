@@ -1,10 +1,10 @@
-import { clearMessages, createMessage, storeMessage, capitalizeFirstLetter } from "./utils.js";
-import { initializeApp } from "./app.js";
-import { addEvent } from "./firebaseService.js";
+import { clearMessages, createMessage, storeMessage, capitalizeFirstLetter } from "./utils";
+import { initializeApp } from "./app";
+import { addEvent } from "./firebaseService";
 import { Timestamp } from "firebase/firestore";
-import { Event } from "./models.js";
-import { getUserRole } from "./authService.js";
-import { auth } from "./firebase.js";
+import { Event } from "./models";
+import { getUserRole } from "./authService";
+import { auth } from "./firebase";
 
 //DOM elements
 const createForm = document.getElementById("create-event") as HTMLFormElement;

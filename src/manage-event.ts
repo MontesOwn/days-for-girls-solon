@@ -10,16 +10,16 @@ import {
   closeModal,
   fixDate,
   capitalizeFirstLetter
-} from "./utils.js";
+} from "./utils";
 import {
   getEventById,
   deleteEvent,
   updateEvent,
   getSignUpEntriesForEventId,
   deleteSignUpEntry,
-} from "./firebaseService.js";
-import { initializeApp } from "./app.js";
-import { SignUpEntry, Event } from "./models.js";
+} from "./firebaseService";
+import { initializeApp } from "./app";
+import { SignUpEntry, Event } from "./models";
 
 //DOM Elements
 const signUpEntriesCard = document.getElementById(

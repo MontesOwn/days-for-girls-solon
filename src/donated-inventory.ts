@@ -10,16 +10,16 @@ import {
   populateComponteTypeSelect,
   storeMessage,
   capitalizeFirstLetter
-} from "./utils.js";
+} from "./utils";
 import {
   getFilteredLogEntries,
   addLogEntry,
   deleteLogEntry,
-} from "./firebaseService.js";
-import { initializeApp } from "./app.js";
-import { InventoryEntry } from "./models.js";
-import { auth } from "./firebase.js";
-import { getUserRole } from "./authService.js";
+} from "./firebaseService";
+import { initializeApp } from "./app";
+import { InventoryEntry } from "./models";
+import { auth } from "./firebase";
+import { getUserRole } from "./authService";
 
 //DOM Elements
 const addInventoryModalBackdrop = document.getElementById(

@@ -22,8 +22,8 @@ import {
   Event,
   InventoryEntry,
   SignUpEntry,
-} from "./models.js";
-import { db } from "./firebase.js";
+} from "./models";
+import { db } from "./firebase";
 
 //Global Firebase Variables
 declare const __app_id: string;

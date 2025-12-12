@@ -1,4 +1,4 @@
-import { initializeApp } from "./app.js";
+import { initializeApp } from "./app";
 import {
   createButton,
   createTableRow,
@@ -9,18 +9,18 @@ import {
   openModal,
   closeModal,
   fixDate,
-} from "./utils.js";
-import { InventoryEntry, ComponentItem, ComponentSummary } from "./models.js";
+} from "./utils";
+import { InventoryEntry, ComponentItem, ComponentSummary } from "./models";
 import {
   addComponent,
   getAllComponents,
   deleteComponent,
   seedIfEmptyInventoryLog,
   getAllLogEntires,
-} from "./firebaseService.js";
-import { auth } from "./firebase.js";
-import { User } from "./authService.js";
-import { getUserRole } from "./authService.js";
+} from "./firebaseService";
+import { auth } from "./firebase";
+import { User } from "./authService";
+import { getUserRole } from "./authService";
 
 //DOM elements
 const generateForm = document.getElementById("generateForm") as HTMLFormElement;

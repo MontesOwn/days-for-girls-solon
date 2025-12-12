@@ -9,16 +9,16 @@ import {
   closeModal,
   fixDate,
   populateComponteTypeSelect,
-} from "./utils.js";
+} from "./utils";
 import {
   getFilteredLogEntries,
   addLogEntry,
   deleteLogEntry,
-} from "./firebaseService.js";
-import { initializeApp } from "./app.js";
-import { InventoryEntry } from "./models.js";
+} from "./firebaseService";
+import { initializeApp } from "./app";
+import { InventoryEntry } from "./models";
 import { auth } from "./firebase.js";
-import { getUserRole } from "./authService.js";
+import { getUserRole } from "./authService";
 
 //DOM Elements
 const distributeInventoryModal = document.getElementById(

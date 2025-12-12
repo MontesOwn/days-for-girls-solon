@@ -1,13 +1,13 @@
-import { initializeApp } from "./app.js";
-import { createButton, createMessage, fixDate } from "./utils.js";
-import { auth } from "./firebase.js";
+import { initializeApp } from "./app";
+import { createButton, createMessage, fixDate } from "./utils";
+import { auth } from "./firebase";
 import {
   addDonatePageContent,
   updateDonatePageContent,
   getDonatePageContent,
-} from "./firebaseService.js";
-import { DonatePageContent } from "./models.js";
-import { getUserRole } from "./authService.js";
+} from "./firebaseService";
+import { DonatePageContent } from "./models";
+import { getUserRole } from "./authService";
 import { Timestamp } from "firebase/firestore";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
