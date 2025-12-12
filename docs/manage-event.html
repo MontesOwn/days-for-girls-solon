@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/days-for-girls-solon/assets/manifest-BDGhYsdz.json" />
+    <link rel="icon" type="image/x-icon" href="/days-for-girls-solon/assets/favicon-ClxSuC_q.ico" />
+    <meta name="theme-color" content="#ff9f00" />
+    <meta property="og:title" content="Events - Days for Girls Solon OH Team" />
+    <meta
+      property="og:image"
+      content="https://raw.githubusercontent.com/ryan-montville/days-for-girls-solon/refs/heads/main/images/logo-light.png"
+    />
+    <meta
+      name="description"
+      content="Help the Days for Girls Solon Team empower women and girls globally. Join a Sewing Day, donate, or sign up for our mailing list to advance dignity and education."
+    />
+    <title>Days For Girls Solon Team</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Solway:wght@300;400;500;700;800&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <script type="module" crossorigin src="/days-for-girls-solon/assets/manageEvent-C0-85nh1.js"></script>
+    <link rel="modulepreload" crossorigin href="/days-for-girls-solon/assets/app-DqBdRKCU.js">
+    <link rel="stylesheet" crossorigin href="/days-for-girls-solon/assets/app-BCQRO3jM.css">
+  <link rel="manifest" href="/days-for-girls-solon/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/days-for-girls-solon/registerSW.js"></script></head>
+
+  <body>
+    <a href="#maincontent" class="skip-link">Skip to main content</a>
+    <button id="mobile-nav-toggle" class="material-symbols-outlined">
+      menu
+    </button>
+    <div id="page-wrapper">
+      <div id="header-placeholder"></div>
+      <section class="message-wrapper" id="main-message"></section>
+      <main id="maincontent">
+        <section class="button-row left">
+          <a href="events.html" class="secondary">
+            <span class="material-symbols-outlined">arrow_back</span> Back to
+            Events</a
+          >
+        </section>
+        <article id="loading" class="card">
+          <div class="loader"></div>
+          <h2>Loading Event Details</h2>
+        </article>
+        <!--Hide the cards with .hide until the page has fully loaded-->
+        <article id="event-info" class="card hide"></article>
+        <article class="card hide" id="sign-up-entires-card">
+          <h2>Sign Up Entries</h2>
+        </article>
+        <article class="card hide" id="deleteEventCard">
+          <h2 id="delete-title"></h2>
+          <div class="button-row">
+            <button type="button" class="delete-button full" id="delete-button">
+              <span class="material-symbols-outlined">delete</span> DELETE
+            </button>
+          </div>
+        </article>
+      </main>
+      <div id="footer-placeholder"></div>
+    </div>
+    <div id="modal-placeholder"></div>
+    <!--Edit Event Modal-->
+    <div class="backdrop" id="edit-event-backdrop">
+      <section class="message-wrapper" id="edit-event-modal-message"></section>
+      <form
+        role="dialog"
+        id="edit-event-modal"
+        aria-modal="false"
+        aria-labelledby="dialog-label"
+        class="modal"
+      >
+        <h2 id="form-title">Edit Event</h2>
+        <section class="form-row">
+          <label for="eventTitle">Event Title:</label>
+          <input type="text" id="eventTitle" name="eventTitle" />
+        </section>
+        <section class="form-row">
+          <label for="eventDate">Event Date:</label>
+          <input type="date" id="eventDate" name="eventDate" />
+        </section>
+        <section class="form-row">
+          <label for="eventLocation">Event Location:</label>
+          <input type="text" id="eventLocation" name="eventLocation" />
+        </section>
+        <section class="form-row">
+          <label for="eventTime">Event Time:</label>
+          <input type="text" id="eventTime" name="eventTime" />
+        </section>
+        <section>
+          <label for="eventDescription">Event Description:</label>
+          <br />
+          <textarea id="eventDescription" name="eventDescription"></textarea>
+        </section>
+        <div class="button-row">
+          <button type="button" class="secondary" id="cancel">Cancel</button>
+          <button type="button" class="secondary" id="reset">Reset Form</button>
+          <button type="submit" class="primary" id="update">
+            Update Event
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

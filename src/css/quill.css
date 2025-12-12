@@ -1,0 +1,28 @@
+/* These css rules are used to change the colors of the quill editor in light mode vs dark mode.
+Quill.js does not seem to have a dark mode in their predefined css */
+#editor {
+  height: 400px;
+}
+
+.ql-container.ql-snow,
+.ql-picker-label {
+  color: var(--main-text);
+}
+
+.ql-editor {
+  background-color: var(main-background);
+  color: var(--main-text);
+}
+
+.ql-toolbar.ql-snow {
+  background-color: var(main-background);
+  border-color: #555;
+}
+
+.ql-toolbar.ql-snow .ql-stroke {
+  stroke: var(--main-text);
+}
+
+.ql-toolbar.ql-snow .ql-fill {
+  fill: var(--main-text);
+}

@@ -1,0 +1,33 @@
+# ------------------------------------
+# Dependencies and Compiler Artifacts
+# ------------------------------------
+
+# Node.js dependencies
+node_modules/
+
+# TypeScript build info file
+*.tsbuildinfo
+
+# Node.js logs and debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and Credentials
+.env
+.env.development
+.env.production
+
+# ------------------------------------
+# Operating System and IDE Files
+# ------------------------------------
+
+# Windows
+Thumbs.db
+
+# Visual Studio Code (or other IDE)
+.vscode/
+
+dist/
+dist/firebase.js
+src/firebase.ts

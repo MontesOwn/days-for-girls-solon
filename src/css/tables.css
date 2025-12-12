@@ -1,0 +1,39 @@
+.table-container {
+  overflow-y: auto;
+}
+
+table {
+  border-collapse: collapse;
+  border: 1px solid var(--table-header);
+  margin: 10px 0;
+  width: 100%;
+}
+
+thead {
+  background-color: var(--table-header);
+  color: white;
+  text-align: left;
+}
+
+td {
+  padding: 5px;
+}
+
+tr:nth-child(even) {
+  background-color: var(--body-background);
+}
+
+table ol,
+table ul {
+  margin: 5px 20px;
+}
+
+.delete-button-icon {
+  background-color: transparent;
+  color: var(--main-text);
+}
+
+.delete-button-icon:hover {
+  background-color: var(--secondary-accent);
+  border-radius: 5px;
+}

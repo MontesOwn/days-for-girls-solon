@@ -1,0 +1,92 @@
+/* Page Grid */
+#page-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 140px 30px auto 50px;
+  grid-template-areas:
+    "header"
+    "message-area"
+    "main"
+    "footer";
+  height: 100vh;
+}
+
+header {
+  grid-area: header;
+}
+
+#message-area {
+  grid-area: message-area;
+}
+
+main {
+  grid-area: main;
+}
+
+#about-us {
+  grid-area: about;
+}
+
+#upcoming-events {
+  grid-area: events;
+}
+
+#mailing-list {
+  grid-area: mailing;
+}
+
+#donate {
+  grid-area: donate;
+}
+
+.homepage-layout {
+  display: grid;
+  gap: 5px;
+}
+
+footer {
+  grid-area: footer;
+}
+
+/* Medai breakpoints */
+/* Screens larger than 1044px*/
+@media (min-width: 1045px) {
+  #page-wrapper {
+    justify-items: center;
+  }
+
+  .homepage-layout {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "about about about"
+      "events mailing donate";
+  }
+}
+/* Screens between 851px and 1044px */
+@media (min-width: 851px) and (max-width: 1044px) {
+  #page-wrapper {
+    grid-template-rows: 110px 30px auto 50px;
+  }
+
+  .homepage-layout {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "about about about"
+      "events mailing donate";
+  }
+}
+
+/* Screens smaller than 850 */
+@media (max-width: 850px) {
+  #page-wrapper {
+    grid-template-rows: 100px 50px auto 180px;
+  }
+  .homepage-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "about"
+      "events"
+      "mailing"
+      "donate";
+  }
+}

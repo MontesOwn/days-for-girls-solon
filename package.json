@@ -1,0 +1,30 @@
+{
+  "name": "days-for-girls-solon",
+  "version": "1.0.0",
+  "description": "A web app for the Days for Girls Solon Ohio team",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "author": "Ryan Montville",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
+    "prettier": "3.7.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.1",
+    "vite": "^7.2.4",
+    "vite-plugin-pwa": "^1.1.0"
+  },
+  "dependencies": {
+    "@types/quill": "^2.0.14",
+    "firebase": "^12.6.0",
+    "jiti": "^2.6.1",
+    "quill": "^2.0.3"
+  }
+}
