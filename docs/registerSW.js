@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/days-for-girls-solon/sw.js', { scope: '/days-for-girls-solon/' })})}
