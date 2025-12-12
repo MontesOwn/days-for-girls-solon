@@ -29,5 +29,3 @@ Thumbs.db
 .vscode/
 
 dist/
-dist/firebase.js
-src/firebase.ts
