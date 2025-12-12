@@ -192,7 +192,7 @@ async function loadHeader(
   ) as HTMLElement;
   try {
     //Get the header html from the header file. Using a relative path broke on GitHub pages
-    const response = await fetch(githubTemplateBaseURL + "header.html");
+    const response = await fetch(githubTemplateBaseURL + "templates/header.html");
     if (!response.ok) {
       console.error(`${response.status}: ${response.statusText}`);
       throw new Error("Error fetching header");
@@ -223,7 +223,7 @@ async function loadFooter(): Promise<void> {
   ) as HTMLElement;
   try {
     //Get the footer html from the footer file. Using a relative path broke on GitHub pages
-    const response = await fetch(githubTemplateBaseURL + "footer.html");
+    const response = await fetch(githubTemplateBaseURL + "templates/footer.html");
     if (!response.ok) {
       console.error(`${response.status}: ${response.statusText}`);
       throw new Error("Error fetching footer");
@@ -247,7 +247,7 @@ async function loadModals() {
   ) as HTMLElement;
   try {
     //Get the modal html from the modal file. Using a relative path broke on GitHub pages
-    const response = await fetch(githubTemplateBaseURL + "modal.html");
+    const response = await fetch(githubTemplateBaseURL + "templates/modal.html");
     if (!response.ok) {
       console.error(`${response.status}: ${response.statusText}`);
       throw new Error("Error fetching modals");
