@@ -4,13 +4,13 @@
 
 table {
   border-collapse: collapse;
-  border: 1px solid var(--table-header);
+  border: 1px solid var(--footer-background);
   margin: 10px 0;
   width: 100%;
 }
 
 thead {
-  background-color: var(--table-header);
+  background-color: var(--footer-background);
   color: white;
   text-align: left;
 }

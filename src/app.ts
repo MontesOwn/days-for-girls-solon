@@ -33,7 +33,7 @@ function setUpAuthListener() {
       //Hide the sign in button and show the sign out button
       signInButton.style.display = "none";
       signOutButton.style.display = "block";
-      //Shower the inventory link
+      //Show the inventory link
       if (inventoryLink.classList.contains("hide"))
         inventoryLink.classList.remove("hide");
     } else {

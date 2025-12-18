@@ -14,12 +14,8 @@
     --delete-background: #fc6a03;
     --nav-text: #4f4b4e;
     --nav-hover: #f0f0f0;
-    --current-page-background:#64d9cc;
-    --current-page-background-hover: #80e5d5;
-    --current-page-text: #000;
     --main-background: #fff;
     --main-text: #000;
-    --table-header: #282834;
     --footer-background: #676486;
     --footer-text: #fff;
   }
@@ -41,12 +37,8 @@
     --error-text: #fff;
     --nav-text: #ccc;
     --nav-hover: #222222;
-    --current-page-background:#155650;
-    --current-page-background-hover: #175E57;
-    --current-page-text: #fff;
     --main-background: #333;
     --main-text: #ccc;
-    --table-header: #282834;
     --footer-background: #676486;
     --footer-text: #fff;
   }
@@ -151,12 +143,12 @@ nav a:hover {
 }
 
 [aria-current]:not([aria-current="false"]) {
-  background-color: var(--current-page-background);
-  color: var(--current-page-text);
+  background-color: var(--secondary-accent);
+  color: #fff;
 }
 
 [aria-current]:not([aria-current="false"]):hover {
-  background-color: var(--current-page-background-hover);
+  background-color: var(--secondary-hover);
 }
 
 #sign-in-button,

@@ -15,6 +15,7 @@ import {
   setDoc,
   Timestamp,
   where,
+  QueryConstraint,
 } from "firebase/firestore";
 import {
   ComponentItem,
@@ -76,18 +77,27 @@ function mapDocToInventoryEntry(
  * Returns all the events stored in the firestore
  * @returns - An array of events
  */
-export async function getAllEvents(): Promise<Event[]> {
+export async function getAllEvents(futureOnly: boolean): Promise<Event[]> {
   try {
     const events: Event[] = [];
-    const q = query(collection(db, "events"), orderBy("eventDate", "desc"));
+    const constraints: QueryConstraint[] = [];
+
+    if (futureOnly) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); 
+      constraints.push(where("eventDate", ">=", today));
+    }
+    constraints.push(orderBy("eventDate", "desc"));
+    const q = query(collection(db, "events"), ...constraints);
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
       events.push(mapDocToEvent(doc));
     });
+
     return events;
   } catch (error) {
-    console.error("Error fetching all events:", error);
+    console.error("Error fetching events:", error);
     throw error;
   }
 }

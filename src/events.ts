@@ -70,7 +70,11 @@ async function loadEvents(userRole: string) {
   let eventsList: Event[] = [];
   try {
     //Get the events list from the firestoreService
-    eventsList = await getAllEvents();
+    if (userRole === "admin") {
+      eventsList = await getAllEvents(false);
+    } else {
+      eventsList = await getAllEvents(true);
+    }
   } catch (error: any) {
     createMessage(error, "main-message", "error");
     return;
