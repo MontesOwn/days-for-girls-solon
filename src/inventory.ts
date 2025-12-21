@@ -9,6 +9,9 @@ import {
   openModal,
   closeModal,
   fixDate,
+  makeElement,
+  createLink,
+  createInput,
 } from "./utils";
 import { InventoryEntry, ComponentItem, ComponentSummary } from "./models";
 import {
@@ -23,20 +26,12 @@ import { User } from "./authService";
 import { getUserRole } from "./authService";
 
 //DOM elements
-const generateForm = document.getElementById("generateForm") as HTMLFormElement;
 const mainContent = document.getElementById("maincontent") as HTMLElement;
-const currentInventoryCard = document.getElementById(
-  "current-inventory-card",
-) as HTMLElement;
-const manageInventoryCard = document.getElementById(
-  "manage-inventory-card",
-) as HTMLElement;
-const manageInventoryBackdrop = document.getElementById(
-  "manage-inventory-backdrop",
-) as HTMLElement;
-const manageInventoryModal = document.getElementById(
-  "manage-inventory-modal",
-) as HTMLElement;
+// const generateForm = document.getElementById("generateForm") as HTMLFormElement;
+// const currentInventoryCard = document.getElementById("current-inventory-card") as HTMLElement;
+// const manageInventoryCard = document.getElementById("manage-inventory-card") as HTMLElement;
+const manageInventoryBackdrop = document.getElementById("manage-inventory-backdrop") as HTMLElement;
+const manageInventoryModal = document.getElementById("manage-inventory-modal") as HTMLElement;
 
 function addNewRow(newComponent: ComponentItem, userRole: string | null) {
   //Create a new row for the table with the component details
@@ -104,7 +99,7 @@ function addNewRow(newComponent: ComponentItem, userRole: string | null) {
   }
 }
 
-async function loadCurrentInventory(userRole: string | null) {
+async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole: string | null) {
   let currrentInventoryArray: ComponentItem[] = [];
   try {
     //Get the current inventory from the firestore
@@ -113,6 +108,7 @@ async function loadCurrentInventory(userRole: string | null) {
     createMessage(error, "main-message", "error");
     return;
   }
+
   if (currrentInventoryArray.length === 0) {
     //Display no inventory message
     const noInventoryP = document.createElement("p");
@@ -158,7 +154,6 @@ async function loadCurrentInventory(userRole: string | null) {
   //Hide the loading card and display the current inventory card
   const loadingCard = document.getElementById("loading");
   if (loadingCard) loadingCard.remove();
-  currentInventoryCard.classList.remove("hide");
 }
 
 async function filterDateRange(startDate: Date, endDate: Date) {
@@ -299,12 +294,12 @@ function createEntriesTable(filteredResults: InventoryEntry[]) {
   return tableContainer;
 }
 
-async function generateReport() {
+async function generateReport(generateForm: HTMLFormElement) {
   //Create a generating report message
   createMessage("Generating inventory report...", "report-message", "info");
   let formData: FormData = new FormData(generateForm);
-  let startDateValue = formData.get("startDate");
-  let endDateValue = formData.get("endDate");
+  let startDateValue = formData.get("start-date-input");
+  let endDateValue = formData.get("end-date-input");
   //Validate date range
   if (startDateValue && endDateValue) {
     if (
@@ -336,7 +331,7 @@ async function generateReport() {
     return;
   }
   //Hide the form
-  generateForm.style.display = "none";
+  generateForm.classList.add('hide');
   //Create the report card element
   if (startDateValue && endDateValue) {
     let startDate = new Date(startDateValue.toString());
@@ -389,7 +384,7 @@ async function generateReport() {
       );
       newReportButton.addEventListener("click", () => {
         reportCard.remove();
-        generateForm.style.display = "block";
+        generateForm.classList.remove('hide');
       });
       formRow.appendChild(newReportButton);
       reportCard.appendChild(formRow);
@@ -403,6 +398,7 @@ async function generateReport() {
 }
 
 async function submitData(formData: FormData) {
+  const currentInventoryCard = document.getElementById('current-inventory-card');
   const newComponent: ComponentItem = {
     componentId: "",
     componentType: "",
@@ -441,7 +437,9 @@ async function submitData(formData: FormData) {
           currentInventoryTableBody.appendChild(newRow);
         } else {
           //If the table body does not exist, create/load the table
-          loadCurrentInventory("admin");
+          if (currentInventoryCard) {
+            loadCurrentInventory(currentInventoryCard, "admin");
+          }
         }
       } else {
         //The component was not added to the firestore
@@ -457,95 +455,198 @@ async function submitData(formData: FormData) {
   }
 }
 
+function loadAddNewComponentModal() {
+  manageInventoryModal.innerHTML = "";
+  //Create the form to add a new component type
+  const addNewComponentTypeForm = document.createElement("form");
+  const formHeaderH2 = document.createElement("h2");
+  const formHeader = document.createTextNode("Add a New Component Type");
+  formHeaderH2.appendChild(formHeader);
+  addNewComponentTypeForm.appendChild(formHeaderH2);
+  const nameInputRow = document.createElement("section");
+  nameInputRow.setAttribute("class", "form-row");
+  const nameLabel = document.createElement("label");
+  nameLabel.setAttribute("for", "nameInput");
+  const nameText = document.createTextNode("Name of new component type:");
+  nameLabel.appendChild(nameText);
+  nameInputRow.appendChild(nameLabel);
+  const nameInput = document.createElement("input");
+  nameInput.setAttribute("type", "text");
+  nameInput.setAttribute("id", "nameInput");
+  nameInput.setAttribute("name", "nameInput");
+  nameInputRow.appendChild(nameInput);
+  addNewComponentTypeForm.appendChild(nameInputRow);
+  const buttonRow = document.createElement("section");
+  buttonRow.setAttribute("class", "button-row");
+  const cancelButton = createButton(
+    "Cancel",
+    "button",
+    "cancelButton",
+    "secondary",
+  );
+  cancelButton.addEventListener("click", () => {
+    //Close the modal
+    closeModal("manage-inventory-backdrop");
+  });
+  buttonRow.appendChild(cancelButton);
+  const submitButton = createButton(
+    "Submit",
+    "submt",
+    "submitButton",
+    "primary",
+  );
+  buttonRow.appendChild(submitButton);
+  addNewComponentTypeForm.appendChild(buttonRow);
+  addNewComponentTypeForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = new FormData(addNewComponentTypeForm);
+    submitData(data);
+  });
+  //Add the form to the modal
+  manageInventoryModal.appendChild(addNewComponentTypeForm);
+  //Open the modal
+  openModal(manageInventoryBackdrop, manageInventoryModal, "nameInput");
+}
+
+function loadManageLocationsCard() {
+  const manageLocationsCard = document.getElementById('manage-storage-locations-card') as HTMLElement;
+  manageLocationsCard.innerHTML = '';
+  const manageInventoryCard = document.getElementById('manage-inventory-card') as HTMLElement;
+  const cardHeading = makeElement("h2", null, null, "Manage Storage Locations");
+  manageLocationsCard.appendChild(cardHeading);
+  const storageLocationsTable = makeElement("table", "storage-locations-table", null, null);
+  const colGroup = makeElement("colgroup", null, null, null);
+  const col1 = document.createElement("col");
+  col1.setAttribute("style", "width: auto");
+  colGroup.appendChild(col1);
+  const col2 = document.createElement("col");
+  col2.setAttribute("style", "width: 100px");
+  colGroup.appendChild(col2);
+  const col3 = document.createElement("col");
+  col3.setAttribute("style", "width: 100px");
+  colGroup.appendChild(col3);
+  storageLocationsTable.appendChild(colGroup);
+  const tableHead = makeElement("thead", null, null, null);
+  const locationHeader = makeElement("th", null, null, "Location");
+  tableHead.appendChild(locationHeader);
+  const removeHeader = makeElement("th", null, null, "Remove Location");
+  tableHead.appendChild(removeHeader);
+  const expandHeader = makeElement("th", null, null, "Expand");
+  tableHead.appendChild(expandHeader);
+  storageLocationsTable.appendChild(tableHead);
+  const tableBody = makeElement("tbody", null, null, null);
+
+
+  //Temp row to see layout--------------------------------------------------------------------------------------------------------------
+  const tempLocationRow = makeElement("tr", null, null, null);
+  const locationTd = makeElement("td", null, null, "Placeholder Location. This card doesn't do anything yet");
+  tempLocationRow.appendChild(locationTd);
+  const deleteTempLocationTd = makeElement("td", null, null, null);
+  const deleteButton = createButton("", "button", "delete-button", "delete-button-icon", "delete");
+  deleteTempLocationTd.appendChild(deleteButton);
+  tempLocationRow.appendChild(deleteTempLocationTd);
+  const expandTempTd = makeElement("td", null, null, null);
+  const expandButton = createButton("", "button", "expand-button", "delete-button-icon", "expand_all");
+  expandTempTd.appendChild(expandButton);
+  tempLocationRow.appendChild(expandTempTd);
+  tableBody.appendChild(tempLocationRow);
+  //end temp row-------------------------------------------------------------------------------------------------------------------------
+
+
+  manageLocationsCard.appendChild(storageLocationsTable);
+  storageLocationsTable.appendChild(tableBody);
+  const actionRow = makeElement("section", null, "button-row", null);
+  const addNewStorageLocationButton = createButton("Add New Storage Location", "button", "add-new-location", "secondary", "add_location_alt");
+  addNewStorageLocationButton.addEventListener('click', () => {
+    alert("Feature coming soon");
+    //Open modal to add a new storage location
+  });
+  actionRow.appendChild(addNewStorageLocationButton);
+  const closeLocationsCardButton = createButton("Done", "button", "close-locations-button", "secondary");
+  closeLocationsCardButton.addEventListener('click', () => {
+    manageLocationsCard.classList.add('hide');
+    manageInventoryCard.classList.remove('hide');
+  });
+  actionRow.appendChild(closeLocationsCardButton);
+  manageLocationsCard.appendChild(actionRow);
+
+  //create a table showing current locations that expand to show inventory at that location
+  //Also have a row for inventory that is not set to a location
+  //each row has an edit button to update the count, if lower, the rest of the count goes into not set row.
+  //Prevent number going over what is left in not set
+  //Location row has buton to delete location, will set all inventory as not set
+  //Button to add a new location
+  //Button to finish managing location storage
+  manageInventoryCard.classList.add('hide');
+  manageLocationsCard.classList.remove('hide');
+}
+
 async function updateUIbasedOnAuth(user: User | null) {
   let userRole: string | null = null;
+  const oldInventoryCard = document.getElementById('current-inventory-card');
+  if (oldInventoryCard) oldInventoryCard.remove();
+  let logLinksSection = makeElement("section", "inventory-log-links", "button-row hide", null);
+  //Add an empty section to put inventory log links in if admin
+  mainContent.appendChild(logLinksSection);
+  const currentInventoryCard = makeElement("article", "current-inventory-card", "card", null);
+  const loadingDiv = makeElement("div", "loading", "button-row left", null);
+  const loader = makeElement("div", "loader", "loader", null);
+  loadingDiv.appendChild(loader);
+  const loadingText = makeElement("h2", "loading", null, "Loading Inventory");
+  loadingDiv.appendChild(loadingText);
+  currentInventoryCard.appendChild(loadingDiv);
+  mainContent.appendChild(currentInventoryCard);
   if (user) {
     userRole = await getUserRole(user.uid);
-    //If the user is an admin, show the links to the inventory entry logs, the manage inventory card, and the generate report card
     if (userRole === "admin") {
-      if (generateForm.classList.contains("hide"))
-        generateForm.classList.remove("hide");
-      const inventoryLogLinks = document.getElementById(
-        "inventory-log-links",
-      ) as HTMLElement;
-      if (inventoryLogLinks.classList.contains("hide"))
-        inventoryLogLinks.classList.remove("hide");
-      if (manageInventoryCard.classList.contains("hide"))
-        manageInventoryCard.classList.remove("hide");
+      //Add the inventory log links
+      const donatedInvenoryLink = createLink(null, "secondary", "Donated Inventory", "donated-inventory", false, null);
+      logLinksSection.appendChild(donatedInvenoryLink);
+      const distributedInventoryLink = createLink(null, "secondary", "Distributed Inventory", "distributed-inventory", false, null);
+      logLinksSection.appendChild(distributedInventoryLink);
     }
-  } else {
-    //User is not signed in, hide the manage inventory card and generate report form
-    if (!manageInventoryCard.classList.contains("hide"))
-      manageInventoryCard.classList.add("hide");
-    if (!generateForm.classList.contains("hide"))
-      generateForm.classList.add("hide");
-  }
-  loadCurrentInventory(userRole);
-  //If user is an admin, allow the creation of new compoents
-  if (userRole === "admin") {
-    //Event listener to generate inventory report
-    generateForm.addEventListener("submit", (e) => {
+    //Create an empty card for managing storage locations
+    const manageLocationsCard = makeElement("article", "manage-storage-locations-card", "card hide", null);
+    mainContent.appendChild(manageLocationsCard);
+    //Create the Manage Inventory card
+    const manageInventoryCard = makeElement("article", "manage-inventory-card", "card", null);
+    const cardHeading = makeElement("h2", null, null, "Manage Inventory");
+    manageInventoryCard.appendChild(cardHeading);
+    const buttonRow = makeElement("section", null, "button-row", null);
+    const addNewComponentButton = createButton("Add new component type", "button", "add-new-type", "secondary", "add");
+    addNewComponentButton.addEventListener('click', () => {
+      loadAddNewComponentModal();
+    });
+    buttonRow.appendChild(addNewComponentButton);
+    const manageStorageLocations = createButton("Manage Storage Locations", "buttton", "manage-locations-button", "secondary", "location_on");
+    manageStorageLocations.addEventListener('click', () => {
+      loadManageLocationsCard();
+    });
+    buttonRow.appendChild(manageStorageLocations);
+    manageInventoryCard.appendChild(buttonRow);
+    mainContent.appendChild(manageInventoryCard);
+    //Create the Generate Report card
+    const reportMessageWrapper = makeElement("section", "report-message", "message-wrapper", null);
+    mainContent.appendChild(reportMessageWrapper);
+    const generateReportCard = makeElement("form", "generate-form", "card", null) as HTMLFormElement;
+    const formRow = makeElement("section", null, "button-row", null);
+    const startDateInput = createInput("date", "start-date-input", "Start Date:", null);
+    formRow.appendChild(startDateInput);
+    const endDateInput = createInput("date", "end-date-input", "End Date:", null);
+    formRow.appendChild(endDateInput);
+    generateReportCard.appendChild(formRow);
+    const formButtonRow = makeElement("section", null, "form-row", null);
+    const submitButton = createButton("submit", "submit", "generate-button", "primary full", "list_alt_add");
+    formButtonRow.appendChild(submitButton);
+    generateReportCard.appendChild(formButtonRow)
+    generateReportCard.addEventListener('submit', (e) => {
       e.preventDefault();
-      generateReport();
+      generateReport(generateReportCard);
     });
-
-    //Event listener for button to open Manage Inventory Modal
-    const openMangeInventoryButton = document.getElementById(
-      "add-new-type",
-    ) as HTMLElement;
-    openMangeInventoryButton.addEventListener("click", () => {
-      manageInventoryModal.innerHTML = "";
-      //Create the form to add a new component type
-      const addNewComponentTypeForm = document.createElement("form");
-      const formHeaderH2 = document.createElement("h2");
-      const formHeader = document.createTextNode("Add a New Component Type");
-      formHeaderH2.appendChild(formHeader);
-      addNewComponentTypeForm.appendChild(formHeaderH2);
-      const nameInputRow = document.createElement("section");
-      nameInputRow.setAttribute("class", "form-row");
-      const nameLabel = document.createElement("label");
-      nameLabel.setAttribute("for", "nameInput");
-      const nameText = document.createTextNode("Name of new component type:");
-      nameLabel.appendChild(nameText);
-      nameInputRow.appendChild(nameLabel);
-      const nameInput = document.createElement("input");
-      nameInput.setAttribute("type", "text");
-      nameInput.setAttribute("id", "nameInput");
-      nameInput.setAttribute("name", "nameInput");
-      nameInputRow.appendChild(nameInput);
-      addNewComponentTypeForm.appendChild(nameInputRow);
-      const buttonRow = document.createElement("section");
-      buttonRow.setAttribute("class", "button-row");
-      const cancelButton = createButton(
-        "Cancel",
-        "button",
-        "cancelButton",
-        "secondary",
-      );
-      cancelButton.addEventListener("click", () => {
-        //Close the modal
-        closeModal("manage-inventory-backdrop");
-      });
-      buttonRow.appendChild(cancelButton);
-      const submitButton = createButton(
-        "Submit",
-        "submt",
-        "submitButton",
-        "primary",
-      );
-      buttonRow.appendChild(submitButton);
-      addNewComponentTypeForm.appendChild(buttonRow);
-      addNewComponentTypeForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const data = new FormData(addNewComponentTypeForm);
-        submitData(data);
-      });
-      //Add the form to the modal
-      manageInventoryModal.appendChild(addNewComponentTypeForm);
-      //Open the modal
-      openModal(manageInventoryBackdrop, manageInventoryModal, "nameInput");
-    });
+    mainContent.appendChild(generateReportCard);
   }
+  loadCurrentInventory(currentInventoryCard, userRole);
+  logLinksSection.classList.remove('hide');
 }
 
 initializeApp("Inventory", "Inventory").then(async () => {

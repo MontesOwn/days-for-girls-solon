@@ -43,49 +43,7 @@
     <div id="page-wrapper">
       <div id="header-placeholder"></div>
       <section class="message-wrapper" id="main-message"></section>
-      <main id="maincontent">
-        <!--Links above the inventory cards-->
-        <section class="button-row hide" id="inventory-log-links">
-          <a href="donated-inventory.html" class="secondary"
-            >Donated Inventory</a
-          >
-          <a href="distributed-inventory.html" class="secondary"
-            >Distributed inventory</a
-          >
-        </section>
-        <article id="loading" class="card">
-          <div class="loader"></div>
-          <h2>Loading Inventory</h2>
-        </article>
-        <!--Hide the inventory cards with .hide until the page has fully loaded-->
-        <article class="card hide" id="current-inventory-card">
-          <h2>Current Inventory</h2>
-        </article>
-        <article class="card hide" id="manage-inventory-card">
-          <h2>Manage Inventory</h2>
-          <div class="button-row left">
-            <button class="secondary" id="add-new-type">
-              <span class="material-symbols-outlined">add</span> Add new
-              component type
-            </button>
-          </div>
-        </article>
-        <section class="message-wrapper" id="report-message"></section>
-        <form id="generateForm" class="card hide">
-          <div class="form-row">
-              <label for="startDate">Start Date:</label>
-              <input type="date" id="startDate" name="startDate" />
-              <label for="endDate">End Date:</label>
-              <input type="date" id="endDate" name="endDate" />
-          </div>
-          <div class="form-row">
-            <button type="submit" id="generate-button" class="primary full">
-              <span class="material-symbols-outlined">list_alt_add</span>
-              Generate Report
-            </button>
-          </div>
-        </form>
-      </main>
+      <main id="maincontent"></main>
       <div id="footer-placeholder"></div>
     </div>
     <div id="modal-placeholder"></div>

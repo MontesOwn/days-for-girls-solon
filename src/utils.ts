@@ -36,6 +36,20 @@ export function createButton(
   return newButton;
 }
 
+export function createLink(linkId: string | null, linkClass: string, linkText: string, linkHref: string, external: boolean, iconName: string | null) {
+  const link = makeElement("a", linkId, linkClass, linkText);
+  link.setAttribute('href', linkHref);
+  if (external) {
+    link.setAttribute('target', "_blank");
+  }
+  if (iconName) {
+    const icon = makeElement("span", null, "material-symbols-outlined", iconName);
+    icon.style.marginRight = "5px";
+    link.prepend(icon);
+  }
+  return link;
+}
+
 /**
  * Create a table element and set the table head
  * @param tableId - The ID for the table
@@ -61,6 +75,33 @@ export function createTable(tableId: string, columnHeaders: string[]) {
   );
   newTable.appendChild(tableHead);
   return newTable;
+}
+
+export function makeElement(elementType: string, elementId: string | null, elementClass: string | null, elementText: string | null) {
+  const newElement = document.createElement(elementType);
+  if (elementId) newElement.setAttribute('id', elementId);
+  if (elementClass) {
+    newElement.setAttribute('class', elementClass);
+  }
+  if (elementText) newElement.textContent = elementText;
+  return newElement;
+}
+
+export function createInput(inputType: string, name: string, labelText: string | null, dvivClass: string | null) {
+  const newInput = makeElement("input", name, null, null);
+  newInput.setAttribute("type", inputType);
+  newInput.setAttribute("name", name);
+  if (labelText) {
+    const containerDiv = makeElement("div", null, dvivClass, null);
+    const label = document.createElement('label');
+    label.setAttribute("for", name);
+    label.textContent = labelText;
+    containerDiv.appendChild(label);
+    containerDiv.appendChild(newInput);
+    return containerDiv;
+  } else {
+    return newInput
+  }
 }
 
 /**
