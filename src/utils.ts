@@ -2,7 +2,7 @@ import { Event, SignUpEntry, Component, InventoryEntry, Location, LocationItem }
 import { getListOfComponents } from "./firebaseService";
 import { Timestamp } from "firebase/firestore";
 
-type TableItem = SignUpEntry | Component | InventoryEntry | Location | {};
+type TableItem = SignUpEntry | Component | InventoryEntry | Location | LocationItem | {};
 
 /**
  * Creates a button elment
@@ -141,6 +141,29 @@ export function createTableRow(
         );
         newCell.appendChild(valueString);
       }
+    } else if (key.includes("entry")) {
+      const logEntry = item as InventoryEntry;
+      let entryString: string = "";
+      if (logEntry['locationName'] && logEntry['destination'] && !logEntry['external']) {
+        //Items moved from one location to another internaly
+        entryString = `${logEntry['quantity']} ${logEntry['componentType']} moved from ${logEntry['locationName']} to ${logEntry['destination']} by ${logEntry['whoDonated']}`;
+      } else if (logEntry['locationName'] && !logEntry['external']) {
+        //Items donated
+        entryString = `${logEntry['quantity']} ${logEntry['componentType']} donated to ${logEntry['locationName']} by ${logEntry['whoDonated']}`;
+      } else {
+        //Items distributed externaly
+        entryString = `${logEntry['quantity']} ${logEntry['componentType']} distributed from ${logEntry['locationName']} to ${logEntry['destination']} by ${logEntry['whoDonated']}`;
+      }
+      newCell.textContent = entryString;
+    } else if (key === "quantity") {
+      if (key in item) {
+        const valueString = document.createTextNode(itemValue?.toString() || "");
+        newCell.appendChild(valueString);
+      } else {
+        const valueString = document.createTextNode("0");
+        newCell.appendChild(valueString);
+      }
+
     } else {
       //Handle all other keys, add the value to the cell
       const valueString = document.createTextNode(itemValue?.toString() || "");
@@ -537,7 +560,7 @@ export function createCheckbox(labelTextTrue: string, labelTextFalse: string, ch
   return checkBoxContainer;
 }
 
-export function createSelectList(items: Location[] | Component[], selectName: string, selctId: string) {
+export function createSelectList(items: Location[] | Component[], selectName: string, selctId: string, locationsToShow: string | null) {
   if (selectName === "component" && items.length === 0) {
     const selectElement = document.createElement('select');
     const chooseLocationOption = document.createElement('option');
@@ -545,7 +568,6 @@ export function createSelectList(items: Location[] | Component[], selectName: st
     selectElement.appendChild(chooseLocationOption);
     return selectElement;
   }
-
   const selectElement = items.reduce((acc: HTMLElement, currentItem: Location | Component | LocationItem) => {
     const newOption = document.createElement("option");
     if (selectName === "component") {
@@ -558,23 +580,20 @@ export function createSelectList(items: Location[] | Component[], selectName: st
         newOption.setAttribute('value', currentItem['componentId']);
         acc.appendChild(newOption);
       }
-    } else if (selectName === "location") {
+    } else if (selectName === "location" || selectName === "destination") {
       const location = currentItem as Location;
-      if ("locationId" in currentItem) {
-        newOption.textContent = currentItem['locationName'];
-        newOption.setAttribute("value", currentItem['locationId']);
-        if (!location['external']) {
+      newOption.textContent = location['locationName'];
+        newOption.setAttribute("value", location['locationId']);
+      if (locationsToShow === "internal") {
+        if (location['external'] === false) {
           acc.appendChild(newOption);
         }
-      }
-    } else if (selectName === "destination") {
-      const location = currentItem as Location;
-      if ("locationId" in currentItem) {
-        newOption.textContent = currentItem['locationName'];
-        newOption.setAttribute("value", currentItem['locationId']);
-        if (location['external']) {
+      } else if (locationsToShow === "external") {
+        if (location['external'] === true) {
           acc.appendChild(newOption);
         }
+      } else {
+        acc.appendChild(newOption);
       }
     }
     return acc;

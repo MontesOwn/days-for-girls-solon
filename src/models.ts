@@ -32,10 +32,11 @@ export interface InventoryEntry {
   componentId: string;
   componentType: string;
   locationId: string;
-  locationName?: string;
+  locationName: string;
   quantity: number;
   whoDonated?: string;
   destination?: string;
+  external: boolean;
 }
 
 export interface Event {

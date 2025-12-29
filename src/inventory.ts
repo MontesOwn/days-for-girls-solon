@@ -14,7 +14,7 @@ import {
   createInput,
   createCheckbox
 } from "./utils";
-import { InventoryEntry, Component, ComponentSummary, Location } from "./models";
+import { InventoryEntry, Component, ComponentSummary, Location, LocationItem } from "./models";
 import {
   addNewComponent,
   getListOfComponents,
@@ -23,6 +23,7 @@ import {
   getListOfLocations,
   addNewLocation,
   deleteLocation,
+  getAllLocationItems,
 } from "./firebaseService";
 import { auth } from "./firebase";
 import { User } from "./authService";
@@ -36,7 +37,7 @@ const mainContent = document.getElementById("maincontent") as HTMLElement;
 const manageInventoryBackdrop = document.getElementById("manage-inventory-backdrop") as HTMLElement;
 const manageInventoryModal = document.getElementById("manage-inventory-modal") as HTMLElement;
 
-function addNewRow(newComponent: Component, userRole: string | null) {
+function addNewRow(newComponent: LocationItem | Component, userRole: string | null) {
   //Create a new row for the table with the component details
   const keysToDisplay = ["componentType", "quantity"];
   const idKeyName = "componentId";
@@ -103,24 +104,81 @@ function addNewRow(newComponent: Component, userRole: string | null) {
 }
 
 async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole: string | null) {
-  let currrentInventoryArray: Component[] = [];
+  let currrentInventoryArray: LocationItem[] = [];
+  const cardHeading = makeElement("h2", null, null, "Current Inventory");
+  currentInventoryCard.appendChild(cardHeading);
   try {
     //Get the current inventory from the firestore
-    currrentInventoryArray = await getListOfComponents();
+    currrentInventoryArray = await getAllLocationItems();
   } catch (error: any) {
     createMessage(error, "main-message", "error");
     return;
   }
 
   if (currrentInventoryArray.length === 0) {
-    //Display no inventory message
-    const noInventoryP = document.createElement("p");
-    const noInventory = document.createTextNode(
-      "There are not items currently in the inventory.",
-    );
-    noInventoryP.appendChild(noInventory);
-    currentInventoryCard.appendChild(noInventoryP);
+    const componentItems: Component[] = await getListOfComponents();
+    if (componentItems.length === 0) {
+      //Display no inventory message
+      const noInventoryP = document.createElement("p");
+      const noInventory = document.createTextNode(
+        "There are not items currently in the inventory.",
+      );
+      noInventoryP.appendChild(noInventory);
+      currentInventoryCard.appendChild(noInventoryP);
+    } else {
+      let tableColumnHeaders: string[] = [];
+      //Only admins can delete components
+      if (userRole === "admin") {
+        tableColumnHeaders = ["Component", "Quantity", "Delete"];
+      } else {
+        tableColumnHeaders = ["Component", "Quantity"];
+      }
+      //If the current inventory table already exists in the DOM, remove it
+      const previousTableContainer = document.getElementById(
+        "inventory-table-container",
+      );
+      if (previousTableContainer) previousTableContainer.remove();
+      const tableContainer = document.createElement("div");
+      tableContainer.setAttribute("id", "inventory-table-container");
+      tableContainer.setAttribute("class", "table-container");
+      const currentInventoryTable = createTable(
+        "current-inventory-table",
+        tableColumnHeaders,
+      );
+      const tableBody = componentItems.reduce(
+        (acc: HTMLElement, currentComponent: Component) => {
+          const newRow = addNewRow(currentComponent, userRole);
+          acc.appendChild(newRow);
+          return acc;
+        },
+        document.createElement("tbody"),
+      );
+      tableBody.setAttribute("id", "currentInventoryTableBody");
+      currentInventoryTable.appendChild(tableBody);
+      tableContainer.appendChild(currentInventoryTable);
+      currentInventoryCard.appendChild(tableContainer);
+    }
   } else {
+    //Create the array of items grouped by type
+    const currentTotals = Object.values(
+      currrentInventoryArray.reduce((acc, item) => {
+        const { componentId, quantity } = item;
+        if (!acc[componentId]) {
+          acc[componentId] = {
+            locationId: "all",
+            locationName: "all",
+            componentId: item['componentId'],
+            componentType: item['componentType'],
+            quantity: item['quantity']
+          };
+        } else {
+          // Add to the existing quantity
+          acc[componentId].quantity += quantity;
+        }
+
+        return acc;
+      }, {} as Record<string, LocationItem>)
+    );
     //Create the current inventory table
     let tableColumnHeaders: string[] = [];
     //Only admins can delete components
@@ -141,8 +199,8 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
       "current-inventory-table",
       tableColumnHeaders,
     );
-    const tableBody = currrentInventoryArray.reduce(
-      (acc: HTMLElement, currentComponent: Component) => {
+    const tableBody = currentTotals.reduce(
+      (acc: HTMLElement, currentComponent: LocationItem) => {
         const newRow = addNewRow(currentComponent, userRole);
         acc.appendChild(newRow);
         return acc;
@@ -436,7 +494,14 @@ async function submitComponentData(formData: FormData) {
         if (currentInventoryTableBody) {
           //If the table body exists, add the new row to the top of the table
           //We know the user is an admin, so just pass it as a string instead of from userRole = await getUserRole(user.uid);
-          const newRow = addNewRow(newComponent, "admin");
+          const newLoctionItem: LocationItem = {
+            locationId: "all",
+            locationName: "all",
+            componentId: newComponent['componentId'],
+            componentType: newComponent['componentType'],
+            quantity: 0
+          }
+          const newRow = addNewRow(newLoctionItem, "admin");
           currentInventoryTableBody.appendChild(newRow);
         } else {
           //If the table body does not exist, create/load the table
@@ -468,12 +533,12 @@ async function submitLocationData(formData: FormData) {
     );
   } else {
     const externalCheckbox = formData.get('external-checkbox');
-    console.log(externalCheckbox);
     const newLocation: Location = {
       locationId: "",
       locationName: newLocationInput.toString(),
-      external: false
+      external: externalCheckbox ? true : false
     }
+    console.log(newLocation['external']);
     await addNewLocation(newLocation);
     closeModal("manage-inventory-backdrop");
     loadManageLocationsCard();

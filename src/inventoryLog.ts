@@ -2,7 +2,18 @@ import { Timestamp } from "firebase/firestore";
 import { initializeApp } from "./app";
 import { getUserRole } from "./authService";
 import { auth } from "./firebase";
-import { addIemToLocation, addLogEntry, deleteLocationItemByKeys, deleteLogEntry, getAllItemsForLocation, getAllLogEntires, getListOfComponents, getListOfLocations, updateItemQuantityForLocation } from "./firebaseService";
+import {
+    addIemToLocation,
+    addLogEntry,
+    deleteLocationItemByKeys,
+    deleteLogEntry,
+    getAllItemsForLocation,
+    getAllLogEntires,
+    getListOfComponents,
+    getListOfLocations,
+    updateItemQuantityForLocation,
+    getLocationItem
+} from "./firebaseService";
 import { Component, Location, InventoryEntry, LocationItem } from "./models";
 import {
     closeModal,
@@ -58,9 +69,7 @@ initializeApp("Inventory", "Inventory Log").then(async () => {
     moveButton.addEventListener('click', () => loadMoveModal());
     actionButtons.appendChild(moveButton);
     const distibuteButton = createButton("Distribute Items", "button", "distibute-button", "secondary", "local_shipping");
-    distibuteButton.addEventListener('click', () => {
-        alert("Distrubte items coming soon");
-    });
+    distibuteButton.addEventListener('click', () => loadDistributeModal());
     actionButtons.appendChild(distibuteButton);
     const loading = document.getElementById("loading");
     if (loading) loading.classList.add('hide');
@@ -71,11 +80,7 @@ function addNewRow(newEntry: InventoryEntry) {
     //Create a new row for the table with the entry details
     const keysToDisplay = [
         "entryDate",
-        "componentType",
-        "quantity",
-        "whoDonated",
-        "locationName",
-        "destination"
+        "entry"
     ];
     const idKeyName = "entryId";
     const newRow = createTableRow(
@@ -103,10 +108,76 @@ function addNewRow(newEntry: InventoryEntry) {
                         closeModal("delete-item-backdrop");
                         try {
                             //Delete the log entry
-                            const success = await deleteLogEntry(newEntry["entryId"]);
+                            await deleteLogEntry(newEntry["entryId"]);
+                            if (newEntry['locationName'] && newEntry['destination'] && !newEntry['external']) {
+                                //Move items back to old location
+                                const originalLocation = locations.find(location => location['locationName'] === newEntry['locationName']);
+                                if (originalLocation) {
+                                    const itemToRemoveFrom = await getLocationItem(newEntry['locationId'], newEntry['componentId']);
+                                    if (itemToRemoveFrom) {
+                                        const loweredQuantity = itemToRemoveFrom['quantity'] - newEntry['quantity'];
+                                        if (loweredQuantity === 0) {
+                                            //remove the item from the location
+                                            await deleteLocationItemByKeys(newEntry['locationId'], newEntry['componentId']);
+                                        } else {
+                                            //update the item quantity
+                                            itemToRemoveFrom['quantity'] = loweredQuantity;
+                                            await updateItemQuantityForLocation(itemToRemoveFrom);
+                                        }
+                                    }
+                                    const itemToUpdate = await getLocationItem(originalLocation['locationId'], newEntry['componentId']);
+                                    if (itemToUpdate) {
+                                        //update the quantity in the old location
+                                        const updatedQuantity = itemToUpdate['quantity'] + newEntry['quantity'];
+                                        itemToUpdate['quantity'] = updatedQuantity;
+                                        await updateItemQuantityForLocation(itemToUpdate);
+                                    } else {
+                                        const itemToReturn: LocationItem = {
+                                            locationId: originalLocation['locationId'],
+                                            locationName: originalLocation['locationName'],
+                                            componentId: newEntry['componentId'],
+                                            componentType: newEntry['componentType'],
+                                            quantity: newEntry['quantity']
+                                        }
+                                        await addIemToLocation(itemToReturn);
+                                    }
+                                }
+                            } else if (newEntry['external']) {
+                                //Add quantity back to item from distribution
+                                const itemToUpdate = await getLocationItem(newEntry['locationId'], newEntry['componentId']);
+                                if (itemToUpdate) {
+                                    //Update the quantity
+                                    itemToUpdate['quantity'] = itemToUpdate['quantity'] + newEntry['quantity'];
+                                    await updateItemQuantityForLocation(itemToUpdate);
+                                } else {
+                                    //Add the item back to the location
+                                    const itemToAdd: LocationItem = {
+                                        locationId: newEntry['locationId'],
+                                        locationName: newEntry['locationName'],
+                                        componentId: newEntry['componentId'],
+                                        componentType: newEntry['componentType'],
+                                        quantity: newEntry['quantity']
+                                    }
+                                    await addIemToLocation(itemToAdd)
+                                }
+                            } else {
+                                //Reduce quantity from donation
+                                const itemToUpdate = await getLocationItem(newEntry['locationId'], newEntry['componentId']);
+                                if (itemToUpdate) {
+                                    const updatedQuantity = itemToUpdate['quantity'] - newEntry['quantity'];
+                                    if (updatedQuantity === 0) {
+                                        //Remove the item from the locaiton
+                                        await deleteLocationItemByKeys(newEntry['locationId'], newEntry['componentId']);
+                                    } else {
+                                        //Lower the quantity
+                                        itemToUpdate['quantity'] = updatedQuantity;
+                                        await updateItemQuantityForLocation(itemToUpdate);
+                                    }
+                                }
+                            }
                             //Create a message saying the log entry has been deleted
                             createMessage(
-                                `Deleted entry ${fixDate(newEntry["entryDate"].toString(), "shortDate")}: ${newEntry["quantity"]} ${newEntry["componentType"]} to ${newEntry["destination"]}`,
+                                `Deleted entry ${fixDate(newEntry["entryDate"].toString(), "shortDate")}: ${newEntry["quantity"]} ${newEntry["componentType"]}`,
                                 "main-message",
                                 "delete",
                             );
@@ -139,11 +210,7 @@ async function loadInventoryEntries() {
         } else {
             const tableColumnHeaders: string[] = [
                 "Date",
-                "Component",
-                "Quantity",
-                "Who Donated",
-                "Location",
-                "Destination",
+                "Entry",
                 "Delete"
             ];
             const entriesTableContainer = document.getElementById("entries-table-container");
@@ -179,7 +246,7 @@ async function loadDonateModal() {
     const componetTypeRow = makeElement("section", null, "form-row", null);
     const componentLabel = makeElement("label", null, null, "Select component type:");
     componentLabel.setAttribute("for", "component-select");
-    const compnentSelect = createSelectList(components, "component", "component-select");
+    const compnentSelect = createSelectList(components, "component", "component-select", null);
     componetTypeRow.appendChild(componentLabel);
     componetTypeRow.appendChild(compnentSelect);
     InventoryModal.appendChild(componetTypeRow);
@@ -187,7 +254,7 @@ async function loadDonateModal() {
     const locationRow = makeElement("section", null, "form-row", null);
     const locationLabel = makeElement("label", null, null, "Select location:");
     locationLabel.setAttribute("for", "location-select");
-    const locationSelect = createSelectList(locations, "location", "location-select");
+    const locationSelect = createSelectList(locations, "location", "location-select", "internal");
     locationRow.appendChild(locationLabel);
     locationRow.appendChild(locationSelect);
     InventoryModal.appendChild(locationRow);
@@ -216,9 +283,11 @@ async function submitDonatedData(formData: FormData) {
         entryDate: Timestamp.fromDate(new Date(0)),
         componentId: "",
         locationId: "",
+        locationName: "",
         componentType: "",
         quantity: 0,
         whoDonated: "",
+        external: false
     }
     const whoDonatedInput = formData.get('who-donated');
     if (whoDonatedInput === null || whoDonatedInput.toString().trim() === "") {
@@ -322,7 +391,7 @@ async function loadMoveModal() {
     const currentLocationRow = makeElement("section", null, "form-row", null);
     const currentLocationLabel = makeElement("label", null, null, "Select current location:");
     currentLocationLabel.setAttribute("for", "current-location-select");
-    const currentLocationSelect = createSelectList(locations, "location", "current-location-select");
+    const currentLocationSelect = createSelectList(locations, "location", "current-location-select", "internal");
     currentLocationRow.appendChild(currentLocationLabel);
     currentLocationRow.appendChild(currentLocationSelect);
     InventoryModal.appendChild(currentLocationRow);
@@ -360,7 +429,7 @@ async function loadMoveModal() {
             const noItemsP = makeElement("p", null, null, "Please choose a different location");
             componetTypeRow.appendChild(noItemsP);
         } else {
-            const newComponetSelect = createSelectList(componentsAtLocation, "component", "component-select");
+            const newComponetSelect = createSelectList(componentsAtLocation, "component", "component-select", null);
             newComponetSelect.addEventListener('change', (e) => {
                 e.preventDefault();
                 const target = e.target as HTMLSelectElement;
@@ -375,7 +444,7 @@ async function loadMoveModal() {
             const newLocationLabel = makeElement("label", null, null, "Select new location:");
             newLocationLabel.setAttribute("for", "new-location-select");
             const filteredLocations = locations.filter(location => location['locationId'] !== selectedLocation);
-            const newLocationSelect = createSelectList(filteredLocations, "location", "new-location-select");
+            const newLocationSelect = createSelectList(filteredLocations, "location", "new-location-select", "internal");
             newLocationRow.appendChild(newLocationLabel);
             newLocationRow.appendChild(newLocationSelect);
             newLocationRow.classList.remove('hide');
@@ -398,10 +467,12 @@ async function submitMoveData(formData: FormData, selectedComponentObject: Locat
         entryDate: Timestamp.fromDate(new Date(0)),
         componentId: "",
         locationId: "",
+        locationName: "",
         componentType: "",
         quantity: 0,
         whoDonated: "",
-        destination: ""
+        destination: "",
+        external: false
     }
     const whoDonatedInput = formData.get('who-donated');
     if (whoDonatedInput === null || whoDonatedInput.toString().trim() === "") {
@@ -506,6 +577,195 @@ async function submitMoveData(formData: FormData, selectedComponentObject: Locat
                 await loadInventoryEntries();
             }
             createMessage(`Moved ${itemForNewLocation['quantity']} ${itemForNewLocation['componentType']} from ${newLogEntry['locationName']} to ${newLogEntry['destination']}`, "main-message", "check_circle");
+        }
+    } catch (error: any) {
+        createMessage(error, "main-message", "error");
+    }
+}
+
+async function loadDistributeModal() {
+    InventoryModal.innerHTML = '';
+    const formHeading = makeElement("h2", null, null, "Distibute Items");
+    InventoryModal.appendChild(formHeading);
+    //Who Donated
+    const whoDonated = createInput("text", "who-donated", "Your name:", "form-row");
+    InventoryModal.appendChild(whoDonated);
+    //Date
+    const dateInput = createInput("date", "date", "Date entered:", "form-row");
+    InventoryModal.appendChild(dateInput);
+    //Location select
+    const currentLocationRow = makeElement("section", null, "form-row", null);
+    const currentLocationLabel = makeElement("label", null, null, "Select current location:");
+    currentLocationLabel.setAttribute("for", "current-location-select");
+    const currentLocationSelect = createSelectList(locations, "location", "current-location-select", "internal");
+    currentLocationRow.appendChild(currentLocationLabel);
+    currentLocationRow.appendChild(currentLocationSelect);
+    InventoryModal.appendChild(currentLocationRow);
+    //New Location select
+    const newLocationRow = makeElement("section", "new-location-row", "form-row hide", null);
+    InventoryModal.appendChild(newLocationRow);
+    //Componet row
+    const componetTypeRow = makeElement("section", null, "form-row", null);
+    InventoryModal.appendChild(componetTypeRow);
+    //Quantity
+    const quantityInput = createInput("number", "quantity", "Quantity:", "form-row hide")
+    InventoryModal.appendChild(quantityInput);
+    //Form Buttons
+    const formButtons = makeElement("section", null, "button-row", null);
+    const cancelButton = createButton("Cancel", "button", "cancel", "secondary");
+    cancelButton.addEventListener('click', () => closeModal("inventory-backdrop"));
+    formButtons.appendChild(cancelButton);
+    const submitButton = createButton("Submit", "submit", "submit", "primary hide");
+    formButtons.appendChild(submitButton);
+    InventoryModal.appendChild(formButtons);
+    let selectedComponentObject: LocationItem | undefined = undefined;
+    currentLocationSelect.addEventListener('change', async (e) => {
+        e.preventDefault();
+        newLocationRow.classList.add('hide');
+        quantityInput.classList.add('hide');
+        newLocationRow.classList.add('hide');
+        submitButton.classList.add('hide');
+        componetTypeRow.innerHTML = '';
+        newLocationRow.innerHTML = '';
+        const target = e.target as HTMLSelectElement;
+        const selectedLocation = target.value;
+        //Componet Type select
+        const componentsAtLocation = await getAllItemsForLocation(selectedLocation);
+        if (componentsAtLocation.length === 0) {
+            const noItemsP = makeElement("p", null, null, "Please choose a different location");
+            componetTypeRow.appendChild(noItemsP);
+        } else {
+            const newComponetSelect = createSelectList(componentsAtLocation, "component", "component-select", null);
+            newComponetSelect.addEventListener('change', (e) => {
+                e.preventDefault();
+                const target = e.target as HTMLSelectElement;
+                const selectedComponentId = target.value;
+                selectedComponentObject = componentsAtLocation.find(item => item['componentId'] === selectedComponentId)
+            })
+            const componentLabel = makeElement("label", null, null, "Select component type:");
+            componentLabel.setAttribute("for", "component-select");
+            componetTypeRow.appendChild(componentLabel);
+            componetTypeRow.appendChild(newComponetSelect);
+            const newLocationLabel = makeElement("label", null, null, "Select destination:");
+            newLocationLabel.setAttribute("for", "destination-select");
+            const newLocationSelect = createSelectList(locations, "destination", "destination-select", "external");
+            newLocationRow.appendChild(newLocationLabel);
+            newLocationRow.appendChild(newLocationSelect);
+            newLocationRow.classList.remove('hide');
+            quantityInput.classList.remove('hide');
+            newLocationRow.classList.remove('hide');
+            submitButton.classList.remove('hide');
+        }
+    });
+    InventoryModal.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData: FormData = new FormData(InventoryModal);
+        await submitDistibuteData(formData, selectedComponentObject);
+    });
+    openModal(InventoryModalBackdrop, InventoryModal, "component-select");
+}
+
+async function submitDistibuteData(formData: FormData, selectedComponentObject: LocationItem | undefined) {
+    let newLogEntry: InventoryEntry = {
+        entryId: "",
+        entryDate: Timestamp.fromDate(new Date(0)),
+        componentId: "",
+        locationId: "",
+        locationName: "",
+        componentType: "",
+        quantity: 0,
+        whoDonated: "",
+        destination: "",
+        external: true
+    }
+    const whoDonatedInput = formData.get('who-donated');
+    if (whoDonatedInput === null || whoDonatedInput.toString().trim() === "") {
+        createMessage("Please enter your name", "modal-message", "error");
+        return;
+    } else {
+        newLogEntry['whoDonated'] = whoDonatedInput.toString();
+    }
+    const dateEntered = formData.get('date');
+    if (dateEntered === null || dateEntered === "") {
+        createMessage("Please select the date entered", "modal-message", "error");
+        return;
+    } else {
+        const jsDate = new Date(dateEntered.toString());
+        newLogEntry['entryDate'] = Timestamp.fromDate(jsDate);
+    }
+    const currentLocationSelect = document.getElementById('current-location-select') as HTMLSelectElement;
+    const currentLocationValue = currentLocationSelect.value;
+    const newLocationValue = formData.get('destination');
+    if (currentLocationValue === null || currentLocationValue.toString().trim() === "") {
+        createMessage("Please select the current location", "modal-message", "error");
+        return;
+    } else {
+        const currentLocationObject = locations.find(location => location['locationId'] === currentLocationValue);
+        if (currentLocationObject) {
+            newLogEntry['locationName'] = currentLocationObject['locationName'];
+        }
+    }
+    if (newLocationValue === null || newLocationValue.toString().trim() === "") {
+        createMessage("Please select the destination", "modal-message", "error");
+        return;
+    } else {
+        const newLocationObject = locations.find(location => location['locationId'] === newLocationValue);
+        if (newLocationObject) {
+            newLogEntry['locationId'] = newLocationValue.toString();
+            newLogEntry['destination'] = newLocationObject['locationName'];
+        }
+    }
+    const quantityInput = formData.get('quantity');
+    if (quantityInput === null) {
+        createMessage("Please enter the quantity", "modal-message", "error");
+        return;
+    } else {
+        const quantityValue: number = +quantityInput;
+        if (quantityValue < 1) {
+            createMessage("Please enter a quantity greater than 0", "modal-message", "error");
+            return;
+        } else {
+            if (selectedComponentObject) {
+                if (quantityValue > selectedComponentObject['quantity']) {
+                    createMessage(`Please enter a quantity less than ${selectedComponentObject['quantity']}`, "modal-message", "error");
+                    return;
+                } else {
+                    newLogEntry['quantity'] = quantityValue;
+                }
+            }
+
+        }
+    }
+    const selectedComponentId = formData.get('component');
+    if (selectedComponentId === null) {
+        createMessage("Please select a component.", "modal-message", "error");
+        return;
+    } else {
+        const selectedComponent: Component | undefined = components.find(component => component['componentId'] === selectedComponentId);
+        if (selectedComponent) {
+            newLogEntry['componentId'] = selectedComponentId.toString();
+            newLogEntry['componentType'] = selectedComponent['componentType'];
+        }
+    }
+    closeModal("inventory-backdrop");
+    createMessage("Submitting Data...", "main-message", "info");
+    try {
+        if (selectedComponentObject) {
+            selectedComponentObject['quantity'] = selectedComponentObject['quantity'] - newLogEntry['quantity'];
+            if (selectedComponentObject['quantity'] === 0) {
+                await deleteLocationItemByKeys(selectedComponentObject['locationId'], selectedComponentObject['componentId']);
+            } else {
+                await updateItemQuantityForLocation(selectedComponentObject);
+            }
+            await addLogEntry(newLogEntry);
+            const entiresTableBody = document.getElementById('entries-table-body');
+            if (entiresTableBody) {
+                const newRow = addNewRow(newLogEntry);
+                entiresTableBody.prepend(newRow);
+            } else {
+                await loadInventoryEntries();
+            }
+            createMessage(`Distributed ${newLogEntry['quantity']} ${newLogEntry['componentType']} from ${newLogEntry['locationName']} to ${newLogEntry['destination']}`, "main-message", "check_circle");
         }
     } catch (error: any) {
         createMessage(error, "main-message", "error");

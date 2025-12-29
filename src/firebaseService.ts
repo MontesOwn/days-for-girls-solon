@@ -506,13 +506,13 @@ export async function deleteLocation(locationId: string): Promise<void> {
 //------------Component--------------
 export async function getListOfComponents(): Promise<Component[]> {
   try {
-    const locatoins: Component[] = [];
+    const locations: Component[] = [];
     const q = query(collection(db, "components"));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-      locatoins.push(mapDocToComponent(doc));
+      locations.push(mapDocToComponent(doc));
     });
-    return locatoins;
+    return locations;
   } catch (error) {
     console.error("Error fetching all components:", error);
     throw new Error("Failed to get components. Please try reloading the page.");
@@ -570,6 +570,21 @@ export async function deleteComponent(componentId: string): Promise<void> {
 }
 
 //------------LocationItem--------------
+export async function getAllLocationItems(): Promise<LocationItem[]> {
+  try {
+    const items: LocationItem[] = [];
+    const q = query(collection(db, "locationItems"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      items.push(mapDocToLocationItem(doc));
+    });
+    return items;
+  } catch (error) {
+    console.error("Error fetching all location items:", error);
+    throw new Error("Failed to get current inventory. Please try reloading the page.");
+  }
+}
+
 export async function getAllItemsForLocation(locationId: string): Promise<LocationItem[]> {
   try {
     const entries: LocationItem[] = [];
@@ -615,7 +630,36 @@ export async function getAllItemsForComponent(componentId: string): Promise<Loca
       error,
     );
     throw new Error(
-      "Failed to get items this component. Please try reloading the page.",
+      "Failed to get items for this component. Please try reloading the page.",
+    );
+  }
+}
+
+export async function getLocationItem(locationId: string, componentId: string) {
+  try {
+    const itemsRef = collection(db, "locationItems");
+    const q = query(
+      itemsRef,
+      where("locationId", "==", locationId),
+      where("componentId", "==", componentId)
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    return {
+      ...(doc.data() as LocationItem),
+    };
+  } catch (error) {
+    console.error(
+      "error fetching location item",
+      error,
+    );
+    throw new Error(
+      "Failed to the item. Please try reloading the page.",
     );
   }
 }
@@ -781,67 +825,8 @@ export async function addLogEntry(newLogEntry: Omit<InventoryEntry, "entryId">):
  */
 export async function deleteLogEntry(entryId: string) {
   try {
-    await runTransaction(db, async (txn) => {
-      //Get the Log Entry Document
-      const logEntryRef = doc(db, "inventoryLog", entryId);
-      const logEntrySnap = await txn.get(logEntryRef);
-
-      if (!logEntrySnap.exists()) {
-        throw new Error("Inventory entry does not exist.");
-      }
-
-      const logEntryToDelete = mapDocToInventoryEntry(logEntrySnap);
-      const { componentId, locationId, quantity: logQuantity } = logEntryToDelete;
-
-      //Determine Reversal Logic
-      let isReversalIncrement: boolean;
-      if (logEntryToDelete.whoDonated) {
-        isReversalIncrement = false;
-      } else if (logEntryToDelete.destination) {
-        isReversalIncrement = true;
-      } else {
-        //If unrecognized, just delete the log
-        txn.delete(logEntryRef);
-        return;
-      }
-
-      //Find the associated LocationItem
-      const itemsRef = collection(db, "locationItems");
-      const q = query(
-        itemsRef,
-        where("locationId", "==", locationId),
-        where("componentId", "==", componentId)
-      );
-
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        //If the item record is gone, we just delete the log
-        txn.delete(logEntryRef);
-        return;
-      }
-
-      const locationItemDoc = querySnapshot.docs[0];
-      const locationItemRef = doc(db, "locationItems", locationItemDoc.id);
-
-      //Read fresh LocationItem data within transaction
-      const itemSnap = await txn.get(locationItemRef);
-      const currentQuantity = itemSnap.data()?.quantity || 0;
-
-      //Calculate Reversal
-      const changeValue = isReversalIncrement ? logQuantity : -logQuantity;
-      const newQuantity = currentQuantity + changeValue;
-
-      if (newQuantity < 0) {
-        throw new Error(
-          `Inconsistency: Reversing this log would result in a negative quantity (${newQuantity}) at this location.`
-        );
-      }
-
-      //Finalize Updates
-      txn.update(locationItemRef, { quantity: newQuantity });
-      txn.delete(logEntryRef);
-    });
+   const docRef = doc(collection(db, "inventoryLog"), entryId);
+   await deleteDoc(docRef);
   } catch (error) {
     console.error(`Error deleting log entry ${entryId}:`, error);
 
