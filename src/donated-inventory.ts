@@ -17,7 +17,7 @@ import {
   deleteLogEntry,
 } from "./firebaseService";
 import { initializeApp } from "./app";
-import { InventoryEntry } from "./models";
+import { InventoryEntry, LocationItem } from "./models";
 import { auth } from "./firebase";
 import { getUserRole } from "./authService";
 

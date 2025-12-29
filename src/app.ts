@@ -146,8 +146,8 @@ export async function initializeApp(partentPage: string, currentPage: string) {
     let distributeInventoryBackdrop = document.getElementById(
       "distribute-inventory-backdrop",
     );
-    let manageInventoryBackdrop = document.getElementById(
-      "manage-inventory-backdrop",
+    let InventoryBackdrop = document.getElementById(
+      "inventory-backdrop",
     );
     if (e.key === "Escape") {
       e.preventDefault();
@@ -172,10 +172,10 @@ export async function initializeApp(partentPage: string, currentPage: string) {
       ) {
         closeModal("distribute-inventory-backdrop");
       } else if (
-        manageInventoryBackdrop &&
-        manageInventoryBackdrop.style.display === "flex"
+        InventoryBackdrop &&
+        InventoryBackdrop.style.display === "flex"
       ) {
-        closeModal("manage-inventory-backdrop");
+        closeModal("inventory-backdrop");
       } else {
         console.warn("Esc key pressed, but no modals are open");
       }

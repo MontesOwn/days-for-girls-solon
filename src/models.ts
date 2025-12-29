@@ -1,17 +1,41 @@
 import { Timestamp } from "firebase/firestore";
 
-//Used for current inventory and for the select input in the doante and distribute forms
-export interface ComponentItem {
+export interface Location {
+  locationId: string;
+  locationName: string;
+  external: boolean;
+}
+
+export interface Component {
+  componentId: string;
+  componentType: string;
+}
+
+export interface LocationItem {
+  locationId: string;
+  locationName: string;
   componentId: string;
   componentType: string;
   quantity: number;
 }
 
-//Used for the summary table when generating a report
 export interface ComponentSummary {
+  componentId: string;
   componentType: string;
   quantityDonated: number;
   quantityDistributed: number;
+}
+
+export interface InventoryEntry {
+  entryId: string;
+  entryDate: Timestamp;
+  componentId: string;
+  componentType: string;
+  locationId: string;
+  locationName?: string;
+  quantity: number;
+  whoDonated?: string;
+  destination?: string;
 }
 
 export interface Event {
@@ -24,17 +48,6 @@ export interface Event {
   numberAttending: number;
 }
 
-/*Used for both distributed and doanted inventory entry logs. If whoDonated is not null, it is a 
-donated inventory log entry. If destination is not null, it is a distributed inventory log entry */
-export interface InventoryEntry {
-  entryId: string;
-  entryDate: Timestamp;
-  componentType: string;
-  quantity: number;
-  whoDonated?: string;
-  destination?: string;
-}
-
 export interface SignUpEntry {
   entryId: string;
   eventId: string;
@@ -43,8 +56,6 @@ export interface SignUpEntry {
   comments?: string;
 }
 
-/* The Quill.js text editor creates a delta from it's contents. Storing the HTML is easier to create the card on the 
-donate page, but the text editor needs the delta to populate the editor when editing existing content */
 export interface DonatePageContent {
   delta: string;
   html: string;

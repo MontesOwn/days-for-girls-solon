@@ -16,6 +16,7 @@ export default defineConfig({
         eventSignUp: resolve(__dirname, "event-sign-up.html"),
         events: resolve(__dirname, "events.html"),
         inventory: resolve(__dirname, "inventory.html"),
+        inventoryLog: resolve(__dirname, "inventoryLog.html"),
         mailingList: resolve(__dirname, "mailing-list.html"),
         manageEvent: resolve(__dirname, "manage-event.html"),
       },

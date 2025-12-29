@@ -1,8 +1,8 @@
-import { Event, SignUpEntry, ComponentItem, InventoryEntry } from "./models";
-import { getAllComponents } from "./firebaseService";
+import { Event, SignUpEntry, Component, InventoryEntry, Location, LocationItem } from "./models";
+import { getListOfComponents } from "./firebaseService";
 import { Timestamp } from "firebase/firestore";
 
-type TableItem = SignUpEntry | ComponentItem | InventoryEntry | {};
+type TableItem = SignUpEntry | Component | InventoryEntry | Location | {};
 
 /**
  * Creates a button elment
@@ -312,7 +312,7 @@ export function retrieveMessage() {
  * @returns - The delete modal
  */
 export function createDeleteModal(
-  itemToDelete: InventoryEntry | ComponentItem | SignUpEntry | Event,
+  itemToDelete: InventoryEntry | Component | SignUpEntry | Event | Location,
   modalTitle: string,
 ): HTMLElement | null {
   //Prevent the page from scrolling
@@ -426,9 +426,9 @@ export function fixDate(
 export async function populateComponteTypeSelect(selctId: string) {
   let selectElement = document.getElementById(selctId) as HTMLSelectElement;
   if (selectElement.options.length === 1) {
-    let components: ComponentItem[] = [];
+    let components: Component[] = [];
     try {
-      components = await getAllComponents();
+      components = await getListOfComponents();
       components.forEach((component) => {
         let newOption = document.createElement("option");
         newOption.setAttribute("value", component["componentType"]);
@@ -498,4 +498,92 @@ export function capitalizeFirstLetter(originalString: string) {
     wordsArray[index] = firstLetter + restOfWord;
   });
   return wordsArray.join(" ");
+}
+
+export function createCheckbox(labelTextTrue: string, labelTextFalse: string, checkboxId: string, checked: boolean, full: boolean) {
+  const checkBoxContainer = document.createElement("div");
+  checkBoxContainer.setAttribute('class', "button-group-row");
+  if (full) checkBoxContainer.classList.add("full");
+  const checkboxLabel = document.createElement("label");
+  checkboxLabel.setAttribute("for", checkboxId);
+  if (checked) {
+    checkboxLabel.textContent = labelTextTrue;
+    checkboxLabel.setAttribute('class', 'secondary check');
+  } else {
+    checkboxLabel.textContent = labelTextFalse;
+    checkboxLabel.setAttribute('class', 'secondary check');
+  }
+
+  if (full) checkboxLabel.classList.add("full");
+  checkBoxContainer.appendChild(checkboxLabel);
+  const checkboxInput = document.createElement('input') as HTMLInputElement;
+  checkboxInput.setAttribute('type', 'checkbox');
+  checkboxInput.setAttribute("id", checkboxId);
+  checkboxInput.setAttribute("name", checkboxId);
+  checkboxInput.checked = checked;
+  checkboxInput.addEventListener('change', (e) => {
+    const isChecked = (e.target as HTMLInputElement).checked;
+    if (isChecked) {
+      checkboxLabel.textContent = labelTextTrue;
+      checkboxLabel.classList.remove('red');
+      checkboxLabel.classList.add('green');
+    } else {
+      checkboxLabel.textContent = labelTextFalse;
+      checkboxLabel.classList.remove('green');
+      checkboxLabel.classList.add('red');
+    }
+  });
+  checkBoxContainer.appendChild(checkboxInput);
+  return checkBoxContainer;
+}
+
+export function createSelectList(items: Location[] | Component[], selectName: string, selctId: string) {
+  if (selectName === "component" && items.length === 0) {
+    const selectElement = document.createElement('select');
+    const chooseLocationOption = document.createElement('option');
+    chooseLocationOption.textContent = "No items for this location";
+    selectElement.appendChild(chooseLocationOption);
+    return selectElement;
+  }
+
+  const selectElement = items.reduce((acc: HTMLElement, currentItem: Location | Component | LocationItem) => {
+    const newOption = document.createElement("option");
+    if (selectName === "component") {
+      if ("componentType" in currentItem && "quantity" in currentItem) {
+        newOption.textContent = currentItem['componentType'] + ": " + currentItem['quantity'];
+        newOption.setAttribute('value', currentItem['componentId']);
+        acc.appendChild(newOption);
+      } else if ("componentType" in currentItem) {
+        newOption.textContent = currentItem['componentType'];
+        newOption.setAttribute('value', currentItem['componentId']);
+        acc.appendChild(newOption);
+      }
+    } else if (selectName === "location") {
+      const location = currentItem as Location;
+      if ("locationId" in currentItem) {
+        newOption.textContent = currentItem['locationName'];
+        newOption.setAttribute("value", currentItem['locationId']);
+        if (!location['external']) {
+          acc.appendChild(newOption);
+        }
+      }
+    } else if (selectName === "destination") {
+      const location = currentItem as Location;
+      if ("locationId" in currentItem) {
+        newOption.textContent = currentItem['locationName'];
+        newOption.setAttribute("value", currentItem['locationId']);
+        if (location['external']) {
+          acc.appendChild(newOption);
+        }
+      }
+    }
+    return acc;
+  }, document.createElement('select'));
+  selectElement.setAttribute("name", selectName);
+  selectElement.setAttribute('id', selctId);
+  const choose = document.createElement('option');
+  choose.textContent = `Select a ${selectName}`;
+  choose.selected = true;
+  selectElement.prepend(choose);
+  return selectElement;
 }
