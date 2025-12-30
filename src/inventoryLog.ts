@@ -30,6 +30,7 @@ import {
     createInput
 } from "./utils";
 
+const newEntryCard = document.getElementById('new-entry-card') as HTMLElement;
 const logEntriesCard = document.getElementById('log-entries-card') as HTMLElement;
 const actionButtons = document.getElementById('action-buttons') as HTMLElement;
 const InventoryModalBackdrop = document.getElementById("inventory-backdrop") as HTMLElement;
@@ -60,21 +61,30 @@ initializeApp("Inventory", "Inventory Log").then(async () => {
         }
     });
     await loadInventoryEntries();
+    loadNewEntryCard();
     components = await getListOfComponents();
     locations = await getListOfLocations();
-    const donateButton = createButton("Donate Items", "button", "new-entry-button", "secondary", "add_notes");
-    donateButton.addEventListener('click', () => loadDonateModal());
-    actionButtons.appendChild(donateButton);
-    const moveButton = createButton("Move Items", "button", "move-button", "secondary", "move_item");
-    moveButton.addEventListener('click', () => loadMoveModal());
-    actionButtons.appendChild(moveButton);
-    const distibuteButton = createButton("Distribute Items", "button", "distibute-button", "secondary", "local_shipping");
-    distibuteButton.addEventListener('click', () => loadDistributeModal());
-    actionButtons.appendChild(distibuteButton);
     const loading = document.getElementById("loading");
     if (loading) loading.classList.add('hide');
+    newEntryCard.classList.remove('hide');
     logEntriesCard.classList.remove('hide');
 });
+
+function loadNewEntryCard() {
+    const cardHeading = makeElement("h2", null, null, "Add New Entry");
+    newEntryCard.appendChild(cardHeading);
+    const buttonRow = makeElement("section", null, "button-row", null);
+    const donateItemsButton = createButton("Donate Items", "button", "donate-items-button", "secondary", "add_notes");
+    donateItemsButton.addEventListener('click', () => loadDonateModal());
+    buttonRow.appendChild(donateItemsButton);
+    const moveItemsButton = createButton("Move Items", "button", "move-button", "secondary", "move_item");
+    moveItemsButton.addEventListener('click', () => loadMoveModal());
+    buttonRow.appendChild(moveItemsButton);
+    const distibuteItemsButton = createButton("Distribute Items", "button", "distibute-button", "secondary", "local_shipping");
+    distibuteItemsButton.addEventListener('click', () => loadDistributeModal());
+    buttonRow.appendChild(distibuteItemsButton);
+    newEntryCard.appendChild(buttonRow);
+}
 
 function addNewRow(newEntry: InventoryEntry) {
     //Create a new row for the table with the entry details
