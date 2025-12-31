@@ -34,7 +34,7 @@ const newEntryCard = document.getElementById('new-entry-card') as HTMLElement;
 const logEntriesCard = document.getElementById('log-entries-card') as HTMLElement;
 const actionButtons = document.getElementById('action-buttons') as HTMLElement;
 const InventoryModalBackdrop = document.getElementById("inventory-backdrop") as HTMLElement;
-const InventoryModal = document.getElementById("inventory-modal") as HTMLFormElement;
+let inventoryModal = document.getElementById("inventory-modal") as HTMLFormElement;
 
 let components: Component[] = [];
 let locations: Location[] = [];
@@ -181,13 +181,14 @@ function addNewRow(newEntry: InventoryEntry) {
                                     } else {
                                         //Lower the quantity
                                         itemToUpdate['quantity'] = updatedQuantity;
+                                        console.log(itemToUpdate);
                                         await updateItemQuantityForLocation(itemToUpdate);
                                     }
                                 }
                             }
                             //Create a message saying the log entry has been deleted
                             createMessage(
-                                `Deleted entry ${fixDate(newEntry["entryDate"].toString(), "shortDate")}: ${newEntry["quantity"]} ${newEntry["componentType"]}`,
+                                `Deleted entry ${newEntry["quantity"]} ${newEntry["componentType"]} from ${newEntry['locationName']}`,
                                 "main-message",
                                 "delete",
                             );
@@ -243,15 +244,18 @@ async function loadInventoryEntries() {
 }
 
 async function loadDonateModal() {
-    InventoryModal.innerHTML = '';
+    inventoryModal.innerHTML = '';
+    const newForm = inventoryModal.cloneNode(true) as HTMLFormElement;
+    inventoryModal.parentNode?.replaceChild(newForm, inventoryModal);
+    inventoryModal = newForm;
     const formHeading = makeElement("h2", null, null, "Donate Items");
-    InventoryModal.appendChild(formHeading);
+    inventoryModal.appendChild(formHeading);
     //Who Donated
     const whoDonated = createInput("text", "who-donated", "Your name:", "form-row");
-    InventoryModal.appendChild(whoDonated);
+    inventoryModal.appendChild(whoDonated);
     //Date
     const dateInput = createInput("date", "date", "Date entered:", "form-row");
-    InventoryModal.appendChild(dateInput);
+    inventoryModal.appendChild(dateInput);
     //Componet Type select
     const componetTypeRow = makeElement("section", null, "form-row", null);
     const componentLabel = makeElement("label", null, null, "Select component type:");
@@ -259,7 +263,7 @@ async function loadDonateModal() {
     const compnentSelect = createSelectList(components, "component", "component-select", null);
     componetTypeRow.appendChild(componentLabel);
     componetTypeRow.appendChild(compnentSelect);
-    InventoryModal.appendChild(componetTypeRow);
+    inventoryModal.appendChild(componetTypeRow);
     //Location select
     const locationRow = makeElement("section", null, "form-row", null);
     const locationLabel = makeElement("label", null, null, "Select location:");
@@ -267,24 +271,25 @@ async function loadDonateModal() {
     const locationSelect = createSelectList(locations, "location", "location-select", "internal");
     locationRow.appendChild(locationLabel);
     locationRow.appendChild(locationSelect);
-    InventoryModal.appendChild(locationRow);
+    inventoryModal.appendChild(locationRow);
     //Quantity
     const quantityInput = createInput("number", "quantity", "Quantity:", "form-row")
-    InventoryModal.appendChild(quantityInput);
+    inventoryModal.appendChild(quantityInput);
     //Form Buttons
     const formButtons = makeElement("section", null, "button-row", null);
     const cancelButton = createButton("Cancel", "button", "cancel", "secondary");
     cancelButton.addEventListener('click', () => closeModal("inventory-backdrop"));
     formButtons.appendChild(cancelButton);
-    const submitButton = createButton("Submit", "submit", "submit", "primary");
+    const submitButton = createButton("Submit", "submit", "submit-donate", "primary") as HTMLButtonElement;
     formButtons.appendChild(submitButton);
-    InventoryModal.appendChild(formButtons);
-    InventoryModal.addEventListener('submit', async (e) => {
+    inventoryModal.appendChild(formButtons);
+    inventoryModal.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData: FormData = new FormData(InventoryModal);
+        submitButton.disabled = true;
+        const formData: FormData = new FormData(inventoryModal);
         await submitDonatedData(formData);
     });
-    openModal(InventoryModalBackdrop, InventoryModal, "component-select");
+    openModal(InventoryModalBackdrop, inventoryModal, "component-select");
 }
 
 async function submitDonatedData(formData: FormData) {
@@ -358,8 +363,18 @@ async function submitDonatedData(formData: FormData) {
             itemAtLocation['quantity'] = newQuantity;
             await updateItemQuantityForLocation(itemAtLocation);
             closeModal("inventory-backdrop");
-            await addLogEntry(newLogEntry);
+            const entryIdReturned = await addLogEntry(newLogEntry);
+            newLogEntry['entryId'] = entryIdReturned;
             createMessage(`${newLogEntry['componentType']} quantity updated at ${newLogEntry['locationName']}`, "main-message", "check_circle");
+            const entiresTableBody = document.getElementById('entries-table-body');
+            if (entiresTableBody) {
+                const newRow = addNewRow(newLogEntry);
+                entiresTableBody.prepend(newRow);
+            } else {
+                await loadInventoryEntries();
+            }
+            const submitButton = document.querySelector('#submit-donate') as HTMLButtonElement;
+            if (submitButton) submitButton.disabled = false;
         } else {
             if (newLogEntry['locationName']) {
                 const itemToAddToLocation: LocationItem = {
@@ -370,7 +385,8 @@ async function submitDonatedData(formData: FormData) {
                     quantity: newLogEntry['quantity']
                 }
                 await addIemToLocation(itemToAddToLocation);
-                await addLogEntry(newLogEntry);
+                const entryIdReturned = await addLogEntry(newLogEntry);
+                newLogEntry['entryId'] = entryIdReturned;
                 closeModal("inventory-backdrop");
                 createMessage(`${newLogEntry['componentType']} added to ${newLogEntry['locationName']}`, "main-message", "check_circle");
             }
@@ -381,22 +397,29 @@ async function submitDonatedData(formData: FormData) {
             } else {
                 await loadInventoryEntries();
             }
+            const submitButton = document.querySelector('#submit-donate') as HTMLButtonElement;
+            if (submitButton) submitButton.disabled = false;
         }
     } catch (error: any) {
         createMessage(error, "main-message", "error");
+        const submitButton = document.querySelector('#submit-donate') as HTMLButtonElement;
+        if (submitButton) submitButton.disabled = false;
     }
 }
 
 async function loadMoveModal() {
-    InventoryModal.innerHTML = '';
+    inventoryModal.innerHTML = '';
+    const newForm = inventoryModal.cloneNode(true) as HTMLFormElement;
+    inventoryModal.parentNode?.replaceChild(newForm, inventoryModal);
+    inventoryModal = newForm;
     const formHeading = makeElement("h2", null, null, "Move Items");
-    InventoryModal.appendChild(formHeading);
+    inventoryModal.appendChild(formHeading);
     //Who Donated
     const whoDonated = createInput("text", "who-donated", "Your name:", "form-row");
-    InventoryModal.appendChild(whoDonated);
+    inventoryModal.appendChild(whoDonated);
     //Date
     const dateInput = createInput("date", "date", "Date entered:", "form-row");
-    InventoryModal.appendChild(dateInput);
+    inventoryModal.appendChild(dateInput);
     //Location select
     const currentLocationRow = makeElement("section", null, "form-row", null);
     const currentLocationLabel = makeElement("label", null, null, "Select current location:");
@@ -404,16 +427,16 @@ async function loadMoveModal() {
     const currentLocationSelect = createSelectList(locations, "location", "current-location-select", "internal");
     currentLocationRow.appendChild(currentLocationLabel);
     currentLocationRow.appendChild(currentLocationSelect);
-    InventoryModal.appendChild(currentLocationRow);
+    inventoryModal.appendChild(currentLocationRow);
     //New Location select
     const newLocationRow = makeElement("section", "new-location-row", "form-row hide", null);
-    InventoryModal.appendChild(newLocationRow);
+    inventoryModal.appendChild(newLocationRow);
     //Componet row
     const componetTypeRow = makeElement("section", null, "form-row", null);
-    InventoryModal.appendChild(componetTypeRow);
+    inventoryModal.appendChild(componetTypeRow);
     //Quantity
     const quantityInput = createInput("number", "quantity", "Quantity:", "form-row hide")
-    InventoryModal.appendChild(quantityInput);
+    inventoryModal.appendChild(quantityInput);
     //Form Buttons
     const formButtons = makeElement("section", null, "button-row", null);
     const cancelButton = createButton("Cancel", "button", "cancel", "secondary");
@@ -421,7 +444,7 @@ async function loadMoveModal() {
     formButtons.appendChild(cancelButton);
     const submitButton = createButton("Submit", "submit", "submit", "primary hide");
     formButtons.appendChild(submitButton);
-    InventoryModal.appendChild(formButtons);
+    inventoryModal.appendChild(formButtons);
     let selectedComponentObject: LocationItem | undefined = undefined;
     currentLocationSelect.addEventListener('change', async (e) => {
         e.preventDefault();
@@ -463,12 +486,12 @@ async function loadMoveModal() {
             submitButton.classList.remove('hide');
         }
     });
-    InventoryModal.addEventListener('submit', async (e) => {
+    inventoryModal.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData: FormData = new FormData(InventoryModal);
+        const formData: FormData = new FormData(inventoryModal);
         await submitMoveData(formData, selectedComponentObject);
     });
-    openModal(InventoryModalBackdrop, InventoryModal, "component-select");
+    openModal(InventoryModalBackdrop, inventoryModal, "component-select");
 }
 
 async function submitMoveData(formData: FormData, selectedComponentObject: LocationItem | undefined) {
@@ -578,7 +601,8 @@ async function submitMoveData(formData: FormData, selectedComponentObject: Locat
             } else {
                 await addIemToLocation(itemForNewLocation);
             }
-            await addLogEntry(newLogEntry);
+            const entryIdReturned = await addLogEntry(newLogEntry);
+            newLogEntry['entryId'] = entryIdReturned;
             const entiresTableBody = document.getElementById('entries-table-body');
             if (entiresTableBody) {
                 const newRow = addNewRow(newLogEntry);
@@ -594,15 +618,18 @@ async function submitMoveData(formData: FormData, selectedComponentObject: Locat
 }
 
 async function loadDistributeModal() {
-    InventoryModal.innerHTML = '';
+    inventoryModal.innerHTML = '';
+    const newForm = inventoryModal.cloneNode(true) as HTMLFormElement;
+    inventoryModal.parentNode?.replaceChild(newForm, inventoryModal);
+    inventoryModal = newForm;
     const formHeading = makeElement("h2", null, null, "Distibute Items");
-    InventoryModal.appendChild(formHeading);
+    inventoryModal.appendChild(formHeading);
     //Who Donated
     const whoDonated = createInput("text", "who-donated", "Your name:", "form-row");
-    InventoryModal.appendChild(whoDonated);
+    inventoryModal.appendChild(whoDonated);
     //Date
     const dateInput = createInput("date", "date", "Date entered:", "form-row");
-    InventoryModal.appendChild(dateInput);
+    inventoryModal.appendChild(dateInput);
     //Location select
     const currentLocationRow = makeElement("section", null, "form-row", null);
     const currentLocationLabel = makeElement("label", null, null, "Select current location:");
@@ -610,16 +637,16 @@ async function loadDistributeModal() {
     const currentLocationSelect = createSelectList(locations, "location", "current-location-select", "internal");
     currentLocationRow.appendChild(currentLocationLabel);
     currentLocationRow.appendChild(currentLocationSelect);
-    InventoryModal.appendChild(currentLocationRow);
+    inventoryModal.appendChild(currentLocationRow);
     //New Location select
     const newLocationRow = makeElement("section", "new-location-row", "form-row hide", null);
-    InventoryModal.appendChild(newLocationRow);
+    inventoryModal.appendChild(newLocationRow);
     //Componet row
     const componetTypeRow = makeElement("section", null, "form-row", null);
-    InventoryModal.appendChild(componetTypeRow);
+    inventoryModal.appendChild(componetTypeRow);
     //Quantity
     const quantityInput = createInput("number", "quantity", "Quantity:", "form-row hide")
-    InventoryModal.appendChild(quantityInput);
+    inventoryModal.appendChild(quantityInput);
     //Form Buttons
     const formButtons = makeElement("section", null, "button-row", null);
     const cancelButton = createButton("Cancel", "button", "cancel", "secondary");
@@ -627,7 +654,7 @@ async function loadDistributeModal() {
     formButtons.appendChild(cancelButton);
     const submitButton = createButton("Submit", "submit", "submit", "primary hide");
     formButtons.appendChild(submitButton);
-    InventoryModal.appendChild(formButtons);
+    inventoryModal.appendChild(formButtons);
     let selectedComponentObject: LocationItem | undefined = undefined;
     currentLocationSelect.addEventListener('change', async (e) => {
         e.preventDefault();
@@ -667,12 +694,12 @@ async function loadDistributeModal() {
             submitButton.classList.remove('hide');
         }
     });
-    InventoryModal.addEventListener('submit', async (e) => {
+    inventoryModal.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData: FormData = new FormData(InventoryModal);
+        const formData: FormData = new FormData(inventoryModal);
         await submitDistibuteData(formData, selectedComponentObject);
     });
-    openModal(InventoryModalBackdrop, InventoryModal, "component-select");
+    openModal(InventoryModalBackdrop, inventoryModal, "component-select");
 }
 
 async function submitDistibuteData(formData: FormData, selectedComponentObject: LocationItem | undefined) {
@@ -767,7 +794,8 @@ async function submitDistibuteData(formData: FormData, selectedComponentObject: 
             } else {
                 await updateItemQuantityForLocation(selectedComponentObject);
             }
-            await addLogEntry(newLogEntry);
+            const entryIdReturned = await addLogEntry(newLogEntry);
+            newLogEntry['entryId'] = entryIdReturned;
             const entiresTableBody = document.getElementById('entries-table-body');
             if (entiresTableBody) {
                 const newRow = addNewRow(newLogEntry);

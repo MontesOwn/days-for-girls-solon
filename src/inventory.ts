@@ -264,7 +264,7 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
     currentInventoryCard.appendChild(filterRow);
     //Filter items
     const inventoryArray: LocationItem[] = filterInventoryForLocation("all", currrentInventoryArray);
-    createInvetoryTable(inventoryArray, userRole);
+    createInvetoryTable(inventoryArray, null);
     //Hide the loading card and display the current inventory card
     const loadingCard = document.getElementById("loading");
     if (loadingCard) loadingCard.remove();
