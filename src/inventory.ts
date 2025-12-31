@@ -106,8 +106,9 @@ async function updateUIbasedOnAuth(user: User | null) {
     });
     mainContent.appendChild(generateReportCard);
   }
-  loadCurrentInventory(currentInventoryCard, userRole);
+  await loadCurrentInventory(currentInventoryCard, userRole);
   logLinksSection.classList.remove('hide');
+  loadingDiv.remove();
 }
 
 function addNewRow(newComponent: LocationItem | Component, showDeleteButton: boolean) {
@@ -384,9 +385,9 @@ async function calculateInventoryTotals(filteredArray: InventoryEntry[]) {
         (item) => item['componentId'] === newComponent["componentId"],
       );
       currentComponentEntries.forEach((entry) => {
-        if (entry["whoDonated"]) {
+        if (entry['locationName'] && !entry['external'] && !entry['destination']) {
           newComponent["quantityDonated"] += entry["quantity"];
-        } else {
+        } else if (entry['external']){
           newComponent["quantityDistributed"] += entry["quantity"];
         }
       });
@@ -452,16 +453,15 @@ function createEntriesTable(filteredResults: InventoryEntry[]) {
       dateCell.appendChild(date);
       entryRow.appendChild(dateCell);
       const entryCell = document.createElement("td");
-      if (currentEntry["whoDonated"]) {
-        const entryText = document.createTextNode(
-          `${currentEntry["quantity"]} ${currentEntry["componentType"]} donated by ${currentEntry["whoDonated"]}`,
-        );
-        entryCell.appendChild(entryText);
+      if (currentEntry['locationName'] && currentEntry['destination'] && !currentEntry['external']) {
+        //Item moves
+        entryCell.textContent = `${currentEntry['quantity']} ${currentEntry['componentType']} moved from ${currentEntry['locationName']} to ${currentEntry['destination']} by ${currentEntry['whoDonated']}`;
+      } else if (currentEntry['locationName'] && !currentEntry['external']) {
+        //Item donated
+        entryCell.textContent = `${currentEntry['quantity']} ${currentEntry['componentType']} donated to ${currentEntry['locationName']} by ${currentEntry['whoDonated']}`
       } else {
-        const entryText = document.createTextNode(
-          `${currentEntry["quantity"]} ${currentEntry["componentType"]} distributed to ${currentEntry["destination"]}`,
-        );
-        entryCell.appendChild(entryText);
+        //Item distributed
+        entryCell.textContent = `${currentEntry['quantity']} ${currentEntry['componentType']} distributed from ${currentEntry['locationName']} to ${currentEntry['destination']} by ${currentEntry['whoDonated']}`
       }
       entryRow.appendChild(entryCell);
       acc.appendChild(entryRow);
@@ -777,7 +777,7 @@ async function loadManageLocationsCard() {
     const tableBody = makeElement("tbody", null, null, null);
     storageLocations.forEach(location => {
       const locationRow = makeElement("tr", location['locationId'].toString(), null, null);
-      const locationTd = makeElement("td", null, null, location['locationName']);
+      const locationTd = makeElement("td", null, null, `${location['locationName']} (${location['external']? 'External' : 'Internal'})`);
       locationRow.appendChild(locationTd);
       const deleteLocationTd = makeElement("td", null, null, null);
       const deleteButton = createButton("", "button", "delete-button", "delete-button-icon", "delete");
