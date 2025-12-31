@@ -63,8 +63,7 @@ async function updateUIbasedOnAuth(user: User | null) {
     if (userRole === "admin") {
       const inventoryLogLink = createLink(null, "secondary", "Inventory Log", "inventoryLog", false, null);
       logLinksSection.appendChild(inventoryLogLink);
-    }
-    //Create an empty card for managing storage locations
+      //Create an empty card for managing storage locations
     const manageLocationsCard = makeElement("article", "manage-storage-locations-card", "card hide", null);
     mainContent.appendChild(manageLocationsCard);
     //Create the Manage Inventory card
@@ -105,6 +104,8 @@ async function updateUIbasedOnAuth(user: User | null) {
       generateReport(generateReportCard);
     });
     mainContent.appendChild(generateReportCard);
+    }
+    
   }
   await loadCurrentInventory(currentInventoryCard, userRole);
   logLinksSection.classList.remove('hide');
