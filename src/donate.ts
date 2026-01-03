@@ -24,6 +24,37 @@ const pageContentSection = document.getElementById(
 let donatePageContent: DonatePageContent | null = null;
 let hasDonateContent: boolean = false;
 
+initializeApp("Donate", "Donate").then(() => {
+  loadDonateContent();
+  auth.onAuthStateChanged(async (user) => {
+    //Only admins can edit the contents of the donate page
+    if (user) {
+      let userRole = await getUserRole(user.uid);
+      if (userRole === "admin") {
+        //If admin, add the edit button to the DOM
+        const editButton = createButton(
+          "Edit",
+          "button",
+          "editButton",
+          "secondary",
+          "edit",
+        );
+        //Event listener for the edit button
+        editButton.addEventListener("click", async () => {
+          outputCard.classList.add("hide");
+          if (donatePageContent) {
+            openQuillEditor(donatePageContent["delta"]);
+          }
+        });
+        outputButtonRow.appendChild(editButton);
+      }
+    } else {
+      const editButton = document.getElementById("editButton");
+      if (editButton) editButton.remove();
+    }
+  });
+});
+
 async function loadDonateContent() {
   //Get the page content from the firestore
   pageContentSection.innerHTML = "";
@@ -164,51 +195,3 @@ async function openQuillEditor(delta: string) {
   //Show the editor card
   editorCard.classList.remove("hide");
 }
-
-initializeApp("Donate", "Donate").then(() => {
-  loadDonateContent();
-  auth.onAuthStateChanged(async (user) => {
-    //Only admins can edit the contents of the donate page
-    if (user) {
-      let userRole = await getUserRole(user.uid);
-      if (userRole === "admin") {
-        //If admin, add the edit button to the DOM
-        const editButton = createButton(
-          "Edit",
-          "button",
-          "editButton",
-          "secondary",
-          "edit",
-        );
-        //Event listener for the edit button
-        editButton.addEventListener("click", async () => {
-          outputCard.classList.add("hide");
-          if (donatePageContent) {
-            openQuillEditor(donatePageContent["delta"]);
-          }
-        });
-        outputButtonRow.appendChild(editButton);
-        //Check to make sure don't need, then remove all this
-        // //Event listener for the cancel button
-        // const cancelButton = document.getElementById('cancel-button') as HTMLElement;
-        // cancelButton.addEventListener('click', () => {
-        //     //Remove the editor from the DOM
-        //     const editor = document.getElementById('editor');
-        //     if (editor) editor.remove();
-        //     //Hide the editor card
-        //     editorCard.classList.add('hide');
-        //     //Show the output card
-        //     outputCard.classList.remove('hide');
-        // });
-        // //Event listener for the update buttton
-        // const updateButton = document.getElementById('update-button') as HTMLElement;
-        // updateButton.addEventListener('click', () => {
-
-        // })
-      }
-    } else {
-      const editButton = document.getElementById("editButton");
-      if (editButton) editButton.remove();
-    }
-  });
-});
