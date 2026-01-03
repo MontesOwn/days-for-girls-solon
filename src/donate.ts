@@ -189,7 +189,9 @@ async function openQuillEditor(delta: string) {
       toolbar: toolbarOptions,
     },
   });
-  quill.setContents(JSON.parse(delta));
+  if (delta !== "") {
+    quill.setContents(JSON.parse(delta));
+  }
   //Hide the output card
   outputCard.classList.add("hide");
   //Show the editor card
