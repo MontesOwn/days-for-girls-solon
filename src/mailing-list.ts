@@ -14,7 +14,7 @@ function submitData() {
   const mailingFormData: FormData = new FormData(mailingListForm);
 
   //Validate full name input
-  const fullNameValue = mailingFormData.get("entry.961884440");
+  const fullNameValue = mailingFormData.get("entry.394076337");
   if (fullNameValue === null || fullNameValue.toString().trim() === "") {
     createMessage("Please enter your name", "main-message", "error");
     return;
@@ -30,7 +30,7 @@ function submitData() {
     }
   }
   //Validate email
-  const emailValue = mailingFormData.get("entry.1887592473");
+  const emailValue = mailingFormData.get("entry.1675960952");
   if (emailValue === null || emailValue.toString().trim() === "") {
     createMessage("Please enter your email", "main-message", "error");
     return;
@@ -41,7 +41,7 @@ function submitData() {
     return;
   }
   //Validate phone if entered
-  const phoneValue = mailingFormData.get("entry.536914204");
+  const phoneValue = mailingFormData.get("entry.889580350");
   if (phoneValue !== null && phoneValue.toString().replace(/\D/g, "") !== "") {
     const parsedPhone: number = parseInt(
       phoneValue.toString().replace(/\D/g, ""),
@@ -66,7 +66,7 @@ function submitData() {
     }
   }
   //Validate volunteer type
-  const volunteerTypeValue = mailingFormData.get("entry.1214187848");
+  const volunteerTypeValue = mailingFormData.get("entry.1085615321");
   if (volunteerTypeValue === null) {
     createMessage(
       "Please select what kind of emails you would like to receive",
@@ -78,7 +78,7 @@ function submitData() {
   //If there are no errors, send the form data to the form response spreadsheet.
   const formData: FormData = new FormData(mailingListForm);
   const formAction: string =
-    "https://docs.google.com/forms/d/e/1FAIpQLSeI082sAdNAfYFnAbLUfuL3dqpz8B7CPKZfxCI_MlT9x-cmAg/formResponse";
+    "https://docs.google.com/forms/d/e/1FAIpQLScUgRwg1GxdTf4IaEfRwc2VwEIT3XSeOAezyInNmu1wyprS3Q/formResponse";
   fetch(formAction, {
     method: "POST",
     body: formData,
