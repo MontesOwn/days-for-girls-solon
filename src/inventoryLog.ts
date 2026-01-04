@@ -289,7 +289,7 @@ async function loadDonateModal() {
         const formData: FormData = new FormData(inventoryModal);
         await submitDonatedData(formData);
     });
-    openModal(InventoryModalBackdrop, inventoryModal, "component-select");
+    openModal(InventoryModalBackdrop, inventoryModal, "who-donated");
 }
 
 async function submitDonatedData(formData: FormData) {
@@ -491,7 +491,7 @@ async function loadMoveModal() {
         const formData: FormData = new FormData(inventoryModal);
         await submitMoveData(formData, selectedComponentObject);
     });
-    openModal(InventoryModalBackdrop, inventoryModal, "component-select");
+    openModal(InventoryModalBackdrop, inventoryModal, "who-donated");
 }
 
 async function submitMoveData(formData: FormData, selectedComponentObject: LocationItem | undefined) {
@@ -699,7 +699,7 @@ async function loadDistributeModal() {
         const formData: FormData = new FormData(inventoryModal);
         await submitDistibuteData(formData, selectedComponentObject);
     });
-    openModal(InventoryModalBackdrop, inventoryModal, "component-select");
+    openModal(InventoryModalBackdrop, inventoryModal, "who-donated");
 }
 
 async function submitDistibuteData(formData: FormData, selectedComponentObject: LocationItem | undefined) {
