@@ -47,9 +47,6 @@ async function updateUIbasedOnAuth(user: User | null) {
   let userRole: string | null = null;
   const oldInventoryCard = document.getElementById('current-inventory-card');
   if (oldInventoryCard) oldInventoryCard.remove();
-  let logLinksSection = makeElement("section", "inventory-log-links", "button-row hide", null);
-  //Add an empty section to put inventory log links in if admin
-  mainContent.appendChild(logLinksSection);
   const currentInventoryCard = makeElement("article", "current-inventory-card", "card", null);
   const loadingDiv = makeElement("div", "loading", "button-row left", null);
   const loader = makeElement("div", "loader", "loader", null);
@@ -61,8 +58,6 @@ async function updateUIbasedOnAuth(user: User | null) {
   if (user) {
     userRole = await getUserRole(user.uid);
     if (userRole === "admin") {
-      const inventoryLogLink = createLink(null, "secondary", "Inventory Log", "inventoryLog", false, null);
-      logLinksSection.appendChild(inventoryLogLink);
       //Create an empty card for managing storage locations
       const manageLocationsCard = makeElement("article", "manage-storage-locations-card", "card hide", null);
       mainContent.appendChild(manageLocationsCard);
@@ -71,7 +66,9 @@ async function updateUIbasedOnAuth(user: User | null) {
       const cardHeading = makeElement("h2", null, null, "Manage Inventory");
       manageInventoryCard.appendChild(cardHeading);
       const buttonRow = makeElement("section", null, "button-row", null);
-      const addNewComponentButton = createButton("Add new component type", "button", "add-new-type", "secondary", "add");
+      const inventoryLogLink = createLink(null, "secondary", "Add/Move/Distribute", "inventoryLog", false, "article");
+      buttonRow.appendChild(inventoryLogLink);
+      const addNewComponentButton = createButton("Manage component types", "button", "add-new-type", "secondary", "add");
       addNewComponentButton.addEventListener('click', () => {
         loadAddNewComponentModal();
       });
@@ -108,7 +105,6 @@ async function updateUIbasedOnAuth(user: User | null) {
 
   }
   await loadCurrentInventory(currentInventoryCard, userRole);
-  logLinksSection.classList.remove('hide');
   loadingDiv.remove();
 }
 
@@ -293,15 +289,22 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
         }, {} as Record<string, LocationItem>)
       );
     } else {
-      return currrentInventoryArray.filter(item => item['locationId'] === locationId);
+      const filteredArray = currrentInventoryArray.filter(item => item['locationId'] === locationId);
+      if (filteredArray.length > 0) {
+        return filteredArray
+      }
+      return [];
     }
   }
 
   function createInvetoryTable(inventoryArray: LocationItem[], userRole: string | null) {
+    console.log(`The inventory array has a length of ${inventoryArray.length}`);
+    const prevNoInventory = document.getElementById("no-inventory");
+    if (prevNoInventory) prevNoInventory.remove();
     //Create the current inventory table
     let tableColumnHeaders: string[] = [];
     let showDeleteButton: boolean = false;
-    if (userRole === "admin" && inventoryArray[0]['locationId'] === "all") {
+    if (userRole === "admin" && inventoryArray.length > 0 && inventoryArray[0]['locationId'] === "all") {
       showDeleteButton = true;
     }
     //Only admins can delete components
@@ -315,7 +318,11 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
       "inventory-table-container",
     );
     if (previousTableContainer) previousTableContainer.remove();
-    const tableContainer = document.createElement("div");
+    if (inventoryArray.length === 0) {
+      const noInventory = makeElement("p", "no-inventory", null, "No inventory for this location");
+      currentInventoryCard.appendChild(noInventory);
+    } else {
+      const tableContainer = document.createElement("div");
     tableContainer.setAttribute("id", "inventory-table-container");
     tableContainer.setAttribute("class", "table-container");
     const currentInventoryTable = createTable(
@@ -334,6 +341,8 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
     currentInventoryTable.appendChild(tableBody);
     tableContainer.appendChild(currentInventoryTable);
     currentInventoryCard.appendChild(tableContainer);
+    }
+    
   }
 }
 
