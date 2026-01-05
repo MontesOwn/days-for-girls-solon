@@ -1,9 +1,10 @@
 import { initializeApp } from "./app";
-import { createMessage, fixDate } from "./utils";
+import { createButton, createMessage, fixDate } from "./modules/utils";
 import { getAllEvents } from "./firebaseService";
 import { Event } from "./models";
 import { auth } from "./firebase";
 import { getUserRole } from "./authService";
+import { navigateTo } from "./modules/navigate";
 
 //DOM elements
 let main = document.getElementById("maincontent") as HTMLElement;
@@ -47,21 +48,17 @@ function addEventToPage(eventData: Event, userRole: string) {
   //Add the action button for the event, determined on user sign in
   let buttonRow: HTMLElement = document.createElement("section");
   buttonRow.setAttribute("class", "button-row left");
-  let button: HTMLElement = document.createElement("a");
-  button.setAttribute("class", "secondary");
   if (userRole === "admin") {
     //Add manage event button
-    button.setAttribute("href", `./manage-event?id=${eventData["eventId"]}`);
-    button.textContent = "Manage Event";
+    const manageButton = createButton("Manage Event", "button", "manage-event", "secondary");
+    manageButton.addEventListener('click', () => navigateTo("/manage-event", {params: {id: eventData["eventId"]}}));
+    buttonRow.appendChild(manageButton);
   } else {
     //Add sign up button
-    button.setAttribute(
-      "href",
-      `./event-sign-up.html?id=${eventData["eventId"]}`,
-    );
-    button.textContent = "Sign Up";
+    const signUpButton = createButton("Sign Up", "button", "sign-up-button", "secondary");
+    signUpButton.addEventListener('click', () => navigateTo("/event-sign-up", {params: {id: eventData["eventId"]}}));
+    buttonRow.appendChild(signUpButton);
   }
-  buttonRow.appendChild(button);
   newEvent.appendChild(buttonRow);
   return newEvent;
 }

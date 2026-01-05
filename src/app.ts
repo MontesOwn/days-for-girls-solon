@@ -2,7 +2,7 @@ import {
   createMessage,
   closeModal,
   retrieveMessage,
-} from "./utils";
+} from "./modules/utils";
 import {
   signInWithGooglePopup,
   signOutUser,

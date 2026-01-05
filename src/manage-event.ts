@@ -10,7 +10,7 @@ import {
   closeModal,
   fixDate,
   capitalizeFirstLetter
-} from "./utils";
+} from "./modules/utils";
 import {
   getEventById,
   deleteEvent,
@@ -20,6 +20,7 @@ import {
 } from "./firebaseService";
 import { initializeApp } from "./app";
 import { SignUpEntry, Event } from "./models";
+import { navigateTo } from "./modules/navigate";
 
 //DOM Elements
 const signUpEntriesCard = document.getElementById(
@@ -331,7 +332,7 @@ async function initAppLogic() {
       "main-message",
       "error",
     );
-    window.location.href = "events.html";
+    navigateTo("/events");
     return;
   }
 
@@ -341,7 +342,7 @@ async function initAppLogic() {
   } catch (error: any) {
     //If there is an error loading the event, store a message and redirect to the events page
     storeMessage(error, "main-message", "error");
-    window.location.href = "events.html";
+    navigateTo("/events");
     return;
   }
 
@@ -399,7 +400,7 @@ async function initAppLogic() {
                 "delete",
               );
               //Redirect to the events page
-              window.location.href = "events.html";
+              navigateTo("/events");
             } catch (error: any) {
               createMessage(error, "main-message", "error");
             }

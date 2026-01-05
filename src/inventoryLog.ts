@@ -28,7 +28,8 @@ import {
     storeMessage,
     createSelectList,
     createInput
-} from "./utils";
+} from "./modules/utils";
+import { navigateTo } from "./modules/navigate";
 
 const newEntryCard = document.getElementById('new-entry-card') as HTMLElement;
 const logEntriesCard = document.getElementById('log-entries-card') as HTMLElement;
@@ -49,7 +50,7 @@ initializeApp("Inventory", "Inventory Log").then(async () => {
                     "main-message",
                     "error",
                 );
-                window.location.href = "inventory.html";
+                navigateTo("/inventory");
             }
         } else {
             storeMessage(
@@ -57,7 +58,7 @@ initializeApp("Inventory", "Inventory Log").then(async () => {
                 "main-message",
                 "error",
             );
-            window.location.href = "inventory.html";
+            navigateTo("/inventory");
         }
     });
     await loadInventoryEntries();

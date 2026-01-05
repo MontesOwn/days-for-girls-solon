@@ -1,5 +1,5 @@
-import { Event, SignUpEntry, Component, InventoryEntry, Location, LocationItem } from "./models";
-import { getListOfComponents } from "./firebaseService";
+import { Event, SignUpEntry, Component, InventoryEntry, Location, LocationItem } from "../models";
+import { getListOfComponents } from "../firebaseService";
 import { Timestamp } from "firebase/firestore";
 
 type TableItem = SignUpEntry | Component | InventoryEntry | Location | LocationItem | {};

@@ -1,10 +1,11 @@
-import { clearMessages, createMessage, storeMessage, capitalizeFirstLetter } from "./utils";
+import { clearMessages, createMessage, storeMessage, capitalizeFirstLetter } from "./modules/utils";
 import { initializeApp } from "./app";
 import { addEvent } from "./firebaseService";
 import { Timestamp } from "firebase/firestore";
 import { Event } from "./models";
 import { getUserRole } from "./authService";
 import { auth } from "./firebase";
+import { navigateTo } from "./modules/navigate";
 
 //DOM elements
 const createForm = document.getElementById("create-event") as HTMLFormElement;
@@ -99,7 +100,7 @@ async function submitData() {
       "check_circle",
     );
     // Redirect to the events page
-    window.location.href = "events.html";
+    navigateTo("/events");
   } catch (error: any) {
     createMessage(error, "main-message", "error");
   }
@@ -125,7 +126,7 @@ initializeApp("Upcoming Events", "Create Event").then(async () => {
           "main-message",
           "error",
         );
-        window.location.href = "events.html";
+        navigateTo("/events");
       }
     } else {
       //If not signed in, redirect them back to the event page
@@ -134,7 +135,7 @@ initializeApp("Upcoming Events", "Create Event").then(async () => {
         "main-message",
         "error",
       );
-      window.location.href = "events.html";
+      navigateTo("/events");
     }
   });
 });

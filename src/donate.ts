@@ -1,5 +1,5 @@
 import { initializeApp } from "./app";
-import { createButton, createMessage, fixDate } from "./utils";
+import { createButton, createMessage, fixDate } from "./modules/utils";
 import { auth } from "./firebase";
 import {
   addDonatePageContent,

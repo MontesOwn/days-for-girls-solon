@@ -13,7 +13,7 @@ import {
   createLink,
   createInput,
   createCheckbox
-} from "./utils";
+} from "./modules/utils";
 import { InventoryEntry, Component, ComponentSummary, Location, LocationItem } from "./models";
 import {
   addNewComponent,
@@ -28,12 +28,10 @@ import {
 import { auth } from "./firebase";
 import { User } from "./authService";
 import { getUserRole } from "./authService";
+import { navigateTo } from "./modules/navigate";
 
 //DOM elements
 const mainContent = document.getElementById("maincontent") as HTMLElement;
-// const generateForm = document.getElementById("generateForm") as HTMLFormElement;
-// const currentInventoryCard = document.getElementById("current-inventory-card") as HTMLElement;
-// const manageInventoryCard = document.getElementById("manage-inventory-card") as HTMLElement;
 const manageInventoryBackdrop = document.getElementById("manage-inventory-backdrop") as HTMLElement;
 let manageInventoryModal = document.getElementById("manage-inventory-modal") as HTMLElement;
 
@@ -66,8 +64,9 @@ async function updateUIbasedOnAuth(user: User | null) {
       const cardHeading = makeElement("h2", null, null, "Manage Inventory");
       manageInventoryCard.appendChild(cardHeading);
       const buttonRow = makeElement("section", null, "button-row", null);
-      const inventoryLogLink = createLink(null, "secondary", "Add/Move/Distribute", "inventoryLog", false, "article");
-      buttonRow.appendChild(inventoryLogLink);
+      const inventoryLogButton = createButton("Add / Move / Distribute Items", "button", "inventory-log-button", "secondary");
+      inventoryLogButton.addEventListener('click', () => navigateTo("/inventoryLog"));
+      buttonRow.appendChild(inventoryLogButton);
       const addNewComponentButton = createButton("Manage component types", "button", "add-new-type", "secondary", "add");
       addNewComponentButton.addEventListener('click', () => {
         loadAddNewComponentModal();
@@ -303,16 +302,17 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
     if (prevNoInventory) prevNoInventory.remove();
     //Create the current inventory table
     let tableColumnHeaders: string[] = [];
-    let showDeleteButton: boolean = false;
-    if (userRole === "admin" && inventoryArray.length > 0 && inventoryArray[0]['locationId'] === "all") {
-      showDeleteButton = true;
-    }
-    //Only admins can delete components
-    if (showDeleteButton) {
-      tableColumnHeaders = ["Component", "Quantity", "Delete"];
-    } else {
-      tableColumnHeaders = ["Component", "Quantity"];
-    }
+    // let showDeleteButton: boolean = false;
+    // if (userRole === "admin" && inventoryArray.length > 0 && inventoryArray[0]['locationId'] === "all") {
+    //   showDeleteButton = true;
+    // }
+    // //Only admins can delete components
+    // if (showDeleteButton) {
+    //   tableColumnHeaders = ["Component", "Quantity", "Delete"];
+    // } else {
+    //   tableColumnHeaders = ["Component", "Quantity"];
+    // }
+    tableColumnHeaders = ["Component", "Quantity"];
     //If the current inventory table already exists in the DOM, remove it
     const previousTableContainer = document.getElementById(
       "inventory-table-container",
@@ -331,7 +331,7 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
     );
     const tableBody = inventoryArray.reduce(
       (acc: HTMLElement, currentComponent: LocationItem) => {
-        const newRow = addNewRow(currentComponent, showDeleteButton);
+        const newRow = addNewRow(currentComponent, false);
         acc.appendChild(newRow);
         return acc;
       },

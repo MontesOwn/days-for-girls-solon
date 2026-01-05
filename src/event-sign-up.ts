@@ -1,8 +1,9 @@
-import { createMessage, storeMessage, fixDate, capitalizeFirstLetter } from "./utils";
+import { createMessage, storeMessage, fixDate, capitalizeFirstLetter } from "./modules/utils";
 import { getEventById, addSignUpEntry } from "./firebaseService";
 import { initializeApp } from "./app";
 import { SignUpEntry, Event } from "./models";
 import { auth } from "./firebase";
+import { navigateTo } from "./modules/navigate";
 
 //DOM Elements
 const signUpForm = document.getElementById("sign-up-form") as HTMLFormElement;
@@ -23,7 +24,7 @@ async function initAppLogic() {
       "main-message",
       "error",
     );
-    window.location.href = "events.html";
+    navigateTo("/events");
     return;
   }
 
@@ -33,7 +34,7 @@ async function initAppLogic() {
   } catch (error: any) {
     //If there is an error loading the event, store a message and redirect to the events page
     storeMessage(error, "main-message", "error");
-    window.location.href = "events.html";
+    navigateTo("/events");
     return;
   }
 
@@ -153,7 +154,7 @@ async function initAppLogic() {
         "check_circle",
       );
       // Redirect to the events page
-      window.location.href = "events.html";
+      navigateTo("/events");
     } catch (error: any) {
       createMessage(error, "main-message", "error");
     }
