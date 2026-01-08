@@ -170,8 +170,8 @@ async function openQuillEditor(delta: string) {
   editorCard.appendChild(buttonRow);
   mainContent.appendChild(editorCard);
   //Cloudinary & Compression Configuration
-  const CLOUD_NAME = "your_cloud_name";
-  const UPLOAD_PRESET = "your_preset_name";
+  const CLOUD_NAME = "dewvjqvzg";
+  const UPLOAD_PRESET = "uw-file-upload";
   const imageHandler = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -193,6 +193,7 @@ async function openQuillEditor(delta: string) {
         const formData = new FormData();
         formData.append('file', compressedFile);
         formData.append('upload_preset', UPLOAD_PRESET);
+        formData.append('folder', 'days-for-girls');
         const response = await fetch(
           `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
           { method: 'POST', body: formData }
