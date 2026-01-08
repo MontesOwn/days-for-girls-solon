@@ -13,8 +13,8 @@ import Quill from "quill";
 import BlotFormatter from '@enzedonline/quill-blot-formatter2';
 import "quill/dist/quill.snow.css";
 import imageCompression from 'browser-image-compression';
-import QuillTableBetter from 'quill-table-better';
-import 'quill-table-better/dist/quill-table-better.css';
+
+Quill.register('modules/blotFormatter', BlotFormatter);
 
 //DOM elements
 const outputCard = document.getElementById("output") as HTMLElement;
@@ -141,19 +141,25 @@ async function submitData(quill: any, editorCard: HTMLElement) {
 }
 
 async function openQuillEditor(delta: string) {
-  //Setup UI Elements
+  // 1. MANUALLY REGISTER THE TABLE ICON (Prevents the button from being empty/invisible)
+  const icons = Quill.import('ui/icons') as any;
+  icons['table'] = '<svg viewbox="0 0 18 18"><rect class="ql-stroke" height="12" width="15" x="1.5" y="3"></rect><line class="ql-stroke" x1="1.5" x2="16.5" y1="9" y2="9"></line><line class="ql-stroke" x1="1.5" x2="16.5" y1="14" y2="14"></line><line class="ql-stroke" x1="1.5" x2="16.5" y1="4" y2="4"></line><line class="ql-stroke" x1="6.5" x2="6.5" y1="3" y2="15"></line><line class="ql-stroke" x1="11.5" x2="11.5" y1="3" y2="15"></line></svg>';
+
+  // Setup UI Elements (Existing code...)
   const editorCard = document.createElement("article");
   editorCard.id = "editor-card";
   editorCard.className = "card hide";
-  //Create a Loading Overlay for uploads
+
   const loader = document.createElement("div");
   loader.className = "quill-loading-overlay hide";
   loader.innerHTML = '<div class="spinner"></div>';
   editorCard.appendChild(loader);
+
   const quillSection = document.createElement("section");
   quillSection.id = "editor";
   editorCard.appendChild(quillSection);
-  //Button Logic
+
+  // Button Logic
   const buttonRow = document.createElement("section");
   buttonRow.className = "button-row";
   const cancelButton = document.createElement("button");
@@ -162,14 +168,18 @@ async function openQuillEditor(delta: string) {
     outputCard.classList.remove("hide");
     editorCard.remove();
   };
+
   const updateButton = document.createElement("button");
   updateButton.textContent = "Update";
   updateButton.className = "primary";
+  // Note: quill is defined below, but JS handles the closure
   updateButton.onclick = () => submitData(quill, editorCard);
+
   buttonRow.append(cancelButton, updateButton);
   editorCard.appendChild(buttonRow);
   mainContent.appendChild(editorCard);
-  //Cloudinary & Compression Configuration
+
+  // Image Handler (Existing code...)
   const CLOUD_NAME = "dewvjqvzg";
   const UPLOAD_PRESET = "uw-file-upload";
   const imageHandler = () => {
@@ -182,24 +192,14 @@ async function openQuillEditor(delta: string) {
       if (!file) return;
       loader.classList.remove('hide');
       try {
-        //COMPRESS IMAGE
-        const compressionOptions = {
-          maxSizeMB: 0.5,
-          maxWidthOrHeight: 1200,
-          useWebWorker: true
-        };
+        const compressionOptions = { maxSizeMB: 0.5, maxWidthOrHeight: 1200, useWebWorker: true };
         const compressedFile = await imageCompression(file, compressionOptions);
-        //UPLOAD TO CLOUDINARY
         const formData = new FormData();
         formData.append('file', compressedFile);
         formData.append('upload_preset', UPLOAD_PRESET);
         formData.append('folder', 'days-for-girls');
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-          { method: 'POST', body: formData }
-        );
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
         const data = await response.json();
-        //INSERT INTO QUILL
         if (data.secure_url) {
           const range = quill.getSelection();
           const index = range ? range.index : quill.getLength();
@@ -208,40 +208,58 @@ async function openQuillEditor(delta: string) {
         }
       } catch (error) {
         console.error("Upload process failed:", error);
-        alert("Error processing image.");
       } finally {
         loader.classList.add('hide');
       }
     };
   };
-  Quill.register('modules/blotFormatter', BlotFormatter);
-  Quill.register({ 'modules/table-better': QuillTableBetter }, true);
-  //Initialize Quill
-  const toolbarOptions = [
-    [{ header: [1, 2, 3, 4] }],
-    ["bold", "italic", "underline", "strike"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    ["blockquote", "link", "image"],
-    ['table-better']
-  ];
+
+  // 2. INITIALIZE QUILL
   const quill = new Quill("#editor", {
     theme: "snow",
     modules: {
-      table: false,
-      'table-better': {
-        toolbarTable: true,
-      },
+      table: true, // Built-in table module
       toolbar: {
-        container: toolbarOptions,
-        handlers: { image: imageHandler }
+        container: [
+          [{ header: [1, 2, 3, 4] }],
+          ["bold", "italic", "underline"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          ["image", "table"] // Simpler table icon trigger
+        ],
+        handlers: {
+          image: imageHandler,
+          // FIX: Use explicit "this" typing for TypeScript
+          table: function (this: any) {
+            const rows = prompt("How many rows?", "3");
+            const cols = prompt("How many columns?", "3");
+
+            if (rows && cols) {
+              const tableModule = this.quill.getModule('table');
+              tableModule.insertTable(parseInt(rows), parseInt(cols));
+            }
+          }
+        },
       },
       blotFormatter: { allowDeselect: true }
     },
   });
-  //Load existing content
+
+  // 3. LOAD CONTENT
   if (delta && delta !== "") {
-    quill.setContents(JSON.parse(delta));
+    try {
+      const parsedDelta = JSON.parse(delta);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          quill.setContents(parsedDelta, 'silent');
+          // Update the cell count AFTER content is set
+          console.log(document.querySelectorAll('.ql-editor td').length + " cells found");
+        }, 50);
+      });
+    } catch (e) {
+      console.error("Error parsing Delta from Firebase:", e);
+    }
   }
+
   outputCard.classList.add("hide");
   editorCard.classList.remove("hide");
 }
