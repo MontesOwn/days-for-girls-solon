@@ -22,6 +22,7 @@
     "vite-plugin-pwa": "^1.1.0"
   },
   "dependencies": {
+    "@enzedonline/quill-blot-formatter2": "^3.0.3",
     "@types/quill": "^2.0.14",
     "firebase": "^12.6.0",
     "jiti": "^2.6.1",

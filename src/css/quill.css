@@ -26,3 +26,40 @@ Quill.js does not seem to have a dark mode in their predefined css */
 .ql-toolbar.ql-snow .ql-fill {
   fill: var(--main-text);
 }
+
+.ql-editor img {
+  display: inline-block;
+  max-width: none;
+}
+
+/* 1. The Container: Make the wrapper behave like a block so it can be centered */
+.ql-image-align-center {
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center;
+}
+
+.ql-image-align-left {
+  display: inline;
+  float: left;
+  margin-right: 1em;
+}
+
+.ql-image-align-right {
+  display: inline;
+  float: right;
+  margin-left: 1em;
+}
+
+/* 2. The Image: Ensure the image inside the span obeys the centering */
+.ql-image-align-center img {
+  display: inline-block;
+}
+
+/* 3. Clearfix: Prevents floated images from breaking the editor layout */
+.ql-editor::after {
+  content: "";
+  display: table;
+  clear: both;
+}

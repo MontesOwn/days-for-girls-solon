@@ -10,6 +10,7 @@ import { DonatePageContent } from "./models";
 import { getUserRole } from "./authService";
 import { Timestamp } from "firebase/firestore";
 import Quill from "quill";
+import BlotFormatter from '@enzedonline/quill-blot-formatter2';
 import "quill/dist/quill.snow.css";
 
 //DOM elements
@@ -180,13 +181,17 @@ async function openQuillEditor(delta: string) {
     [{ header: [1, 2, 3, 4] }],
     ["bold", "italic", "underline", "strike"],
     [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
-    ["blockquote", "link"],
+    ["blockquote", "link", "image"],
   ];
   //Create the Quill text editor
+  Quill.register('modules/blotFormatter', BlotFormatter);
   const quill = new Quill("#editor", {
     theme: "snow",
     modules: {
       toolbar: toolbarOptions,
+      blotFormatter: {
+        allowDeselect: true,
+      },
     },
   });
   if (delta !== "") {
