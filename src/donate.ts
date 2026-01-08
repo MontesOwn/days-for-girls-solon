@@ -12,6 +12,9 @@ import { Timestamp } from "firebase/firestore";
 import Quill from "quill";
 import BlotFormatter from '@enzedonline/quill-blot-formatter2';
 import "quill/dist/quill.snow.css";
+import imageCompression from 'browser-image-compression';
+import QuillTableBetter from 'quill-table-better';
+import 'quill-table-better/dist/quill-table-better.css';
 
 //DOM elements
 const outputCard = document.getElementById("output") as HTMLElement;
@@ -138,67 +141,106 @@ async function submitData(quill: any, editorCard: HTMLElement) {
 }
 
 async function openQuillEditor(delta: string) {
-  //Create the Editor card
+  //Setup UI Elements
   const editorCard = document.createElement("article");
-  editorCard.setAttribute("id", "editor-card");
-  editorCard.setAttribute("class", "card hide");
+  editorCard.id = "editor-card";
+  editorCard.className = "card hide";
+  //Create a Loading Overlay for uploads
+  const loader = document.createElement("div");
+  loader.className = "quill-loading-overlay hide";
+  loader.innerHTML = '<div class="spinner"></div>';
+  editorCard.appendChild(loader);
   const quillSection = document.createElement("section");
-  quillSection.setAttribute("id", "editor");
+  quillSection.id = "editor";
   editorCard.appendChild(quillSection);
-  //Create the button row
+  //Button Logic
   const buttonRow = document.createElement("section");
-  buttonRow.setAttribute("class", "button-row");
-  //Create the cancel button
-  const cancelButton = createButton(
-    "Cancel",
-    "button",
-    "cancel-button",
-    "secondary",
-  );
-  cancelButton.addEventListener("click", () => {
-    //Show the output card
+  buttonRow.className = "button-row";
+  const cancelButton = document.createElement("button");
+  cancelButton.textContent = "Cancel";
+  cancelButton.onclick = () => {
     outputCard.classList.remove("hide");
-    //Remove the editor card from the DOM
     editorCard.remove();
-  });
-  buttonRow.appendChild(cancelButton);
-  //Create the update button
-  const updateButton = createButton(
-    "Update",
-    "button",
-    "update-button",
-    "primary",
-  );
-  updateButton.addEventListener("click", async () => {
-    submitData(quill, editorCard);
-  });
-  buttonRow.appendChild(updateButton);
+  };
+  const updateButton = document.createElement("button");
+  updateButton.textContent = "Update";
+  updateButton.className = "primary";
+  updateButton.onclick = () => submitData(quill, editorCard);
+  buttonRow.append(cancelButton, updateButton);
   editorCard.appendChild(buttonRow);
-  //Add the editor card to the DOM
   mainContent.appendChild(editorCard);
-  //Define the Quill toolbar options
+  //Cloudinary & Compression Configuration
+  const CLOUD_NAME = "your_cloud_name";
+  const UPLOAD_PRESET = "your_preset_name";
+  const imageHandler = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.click();
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      loader.classList.remove('hide');
+      try {
+        //COMPRESS IMAGE
+        const compressionOptions = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true
+        };
+        const compressedFile = await imageCompression(file, compressionOptions);
+        //UPLOAD TO CLOUDINARY
+        const formData = new FormData();
+        formData.append('file', compressedFile);
+        formData.append('upload_preset', UPLOAD_PRESET);
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+          { method: 'POST', body: formData }
+        );
+        const data = await response.json();
+        //INSERT INTO QUILL
+        if (data.secure_url) {
+          const range = quill.getSelection();
+          const index = range ? range.index : quill.getLength();
+          quill.insertEmbed(index, 'image', data.secure_url);
+          quill.setSelection(index + 1);
+        }
+      } catch (error) {
+        console.error("Upload process failed:", error);
+        alert("Error processing image.");
+      } finally {
+        loader.classList.add('hide');
+      }
+    };
+  };
+  Quill.register('modules/blotFormatter', BlotFormatter);
+  Quill.register({ 'modules/table-better': QuillTableBetter }, true);
+  //Initialize Quill
   const toolbarOptions = [
     [{ header: [1, 2, 3, 4] }],
     ["bold", "italic", "underline", "strike"],
-    [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
+    [{ list: "ordered" }, { list: "bullet" }],
     ["blockquote", "link", "image"],
+    ['table-better']
   ];
-  //Create the Quill text editor
-  Quill.register('modules/blotFormatter', BlotFormatter);
   const quill = new Quill("#editor", {
     theme: "snow",
     modules: {
-      toolbar: toolbarOptions,
-      blotFormatter: {
-        allowDeselect: true,
+      table: false,
+      'table-better': {
+        toolbarTable: true,
       },
+      toolbar: {
+        container: toolbarOptions,
+        handlers: { image: imageHandler }
+      },
+      blotFormatter: { allowDeselect: true }
     },
   });
-  if (delta !== "") {
+  //Load existing content
+  if (delta && delta !== "") {
     quill.setContents(JSON.parse(delta));
   }
-  //Hide the output card
   outputCard.classList.add("hide");
-  //Show the editor card
   editorCard.classList.remove("hide");
 }

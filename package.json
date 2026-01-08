@@ -24,8 +24,10 @@
   "dependencies": {
     "@enzedonline/quill-blot-formatter2": "^3.0.3",
     "@types/quill": "^2.0.14",
+    "browser-image-compression": "^2.0.2",
     "firebase": "^12.6.0",
     "jiti": "^2.6.1",
-    "quill": "^2.0.3"
+    "quill": "^2.0.3",
+    "quill-table-better": "^1.2.3"
   }
 }
