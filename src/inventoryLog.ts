@@ -612,7 +612,7 @@ async function submitMoveData(formData: FormData, selectedComponentObject: Locat
             } else {
                 await loadInventoryEntries();
             }
-            createMessage(`Moved ${itemForNewLocation['quantity']} ${itemForNewLocation['componentType']} from ${newLogEntry['locationName']} to ${newLogEntry['destination']}`, "main-message", "check_circle");
+            createMessage(`Moved ${quantityInput} ${itemForNewLocation['componentType']} from ${newLogEntry['locationName']} to ${newLogEntry['destination']}`, "main-message", "check_circle");
         }
     } catch (error: any) {
         createMessage(error, "main-message", "error");

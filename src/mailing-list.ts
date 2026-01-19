@@ -76,6 +76,16 @@ function submitData() {
     );
     return;
   }
+  //Validate language
+  const languageValue = mailingFormData.get("entry.562438076");
+  if (languageValue === null) {
+    createMessage(
+      "Please select a language",
+      "main-message",
+      "error",
+    );
+    return;
+  }
   //If there are no errors, send the form data to the form response spreadsheet.
   const formData: FormData = new FormData(mailingListForm);
   const formAction: string =
