@@ -598,6 +598,7 @@ async function submitMoveData(formData: FormData, selectedComponentObject: Locat
                 quantity: +quantityInput
             }
             if (itemAtNewLocation) {
+                itemForNewLocation['quantity'] += itemAtNewLocation['quantity'];
                 await updateItemQuantityForLocation(itemForNewLocation);
             } else {
                 await addIemToLocation(itemForNewLocation);
