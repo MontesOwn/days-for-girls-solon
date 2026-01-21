@@ -5,6 +5,7 @@ import { Event } from "./models";
 import { auth } from "./firebase";
 import { getUserRole } from "./authService";
 import { navigateTo } from "./modules/navigate";
+import i18n from './i18n';
 
 //DOM elements
 let main = document.getElementById("maincontent") as HTMLElement;
@@ -33,10 +34,7 @@ function addEventToPage(eventData: Event, userRole: string) {
   newEvent.appendChild(eventLocationH4);
   //Add the number of people attending the event
   let numberAttendingH4: HTMLElement = document.createElement("h4");
-  let numberAttending: Text = document.createTextNode(
-    `Number Attending: ${eventData["numberAttending"]}`,
-  );
-  numberAttendingH4.appendChild(numberAttending);
+  numberAttendingH4.textContent = i18n.t('events_number_attending', { count: eventData["numberAttending"] });
   newEvent.appendChild(numberAttendingH4);
   //Add the event description
   let eventDescriptionP: HTMLElement = document.createElement("p");
@@ -55,7 +53,7 @@ function addEventToPage(eventData: Event, userRole: string) {
     buttonRow.appendChild(manageButton);
   } else {
     //Add sign up button
-    const signUpButton = createButton("Sign Up", "button", "sign-up-button", "secondary");
+    const signUpButton = createButton(i18n.t('events_sign_up'), "button", "sign-up-button", "secondary");
     signUpButton.addEventListener('click', () => navigateTo("/event-sign-up", {params: {id: eventData["eventId"]}}));
     buttonRow.appendChild(signUpButton);
   }

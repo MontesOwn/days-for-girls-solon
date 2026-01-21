@@ -44,4 +44,8 @@ i18n.on('languageChanged', () => {
   updateContent();
 });
 
+export function getResolvedLanguage(): string | undefined {
+  return i18n.resolvedLanguage;
+}
+
 export default i18n;
