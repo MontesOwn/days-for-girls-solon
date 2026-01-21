@@ -70,7 +70,13 @@ export async function initializeApp(partentPage: string, currentPage: string) {
   await loadFooter();
   //Load the modals
   await loadModals();
-  updateContent() 
+  const btn = document.getElementById('toggle-btn');
+  btn?.addEventListener('click', () => {
+    const targetLang = i18n.language === 'en' ? 'es' : 'en';
+    i18n.changeLanguage(targetLang);
+    // updateContent() is called automatically because of the listener in i18n.ts
+  });
+  updateContent()
   //Set the page elemenets once the header, footer, and modals are loaded and added to the DOM
   nav = document.querySelector("nav") as HTMLElement;
   inventoryLink = document.getElementById("inventory-link") as HTMLElement;
@@ -276,11 +282,3 @@ function signOut() {
   }
   createMessage("Signed Out Successfully", "main-message", "check_circle");
 }
-
-const btn = document.getElementById('toggle-btn');
-btn?.addEventListener('click', () => {
-  const targetLang = i18n.language === 'en' ? 'es' : 'en';
-  i18n.changeLanguage(targetLang);
-  // updateContent() is called automatically because of the listener in i18n.ts
-});
-const current = getResolvedLanguage();

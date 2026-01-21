@@ -1,7 +1,7 @@
 export const resources = {
   en: {
     translation: {
-      "switch_language": "Cambiar a Español",
+      "switch_language": "en",
       "nav_home": "Home",
       "nav_mailing_list": "Mailing List",
       "upcoming_events": "Upcoming Events",
@@ -43,7 +43,7 @@ export const resources = {
   },
   es: {
     translation: {
-      "switch_language": "Switch to English",
+      "switch_language": "es",
       "nav_home": "Inicio",
       "nav_mailing_list": "Lista de correo",
       "upcoming_events": "Proximos eventos",

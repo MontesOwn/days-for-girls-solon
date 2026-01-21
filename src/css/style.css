@@ -183,6 +183,13 @@ nav a:hover {
   height: 25px;
 }
 
+.blank_button {
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--main-text);
+}
+
 /* Modals */
 .backdrop {
   display: none;
