@@ -432,7 +432,7 @@ export async function getListOfLocations(): Promise<Location[]> {
     return locations;
   } catch (error) {
     console.error("Error fetching all locations:", error);
-    throw new Error("Failed to get locatoins. Please try reloading the page.");
+    throw new Error("Failed to get locations. Please try reloading the page.");
   }
 }
 

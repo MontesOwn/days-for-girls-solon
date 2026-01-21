@@ -149,7 +149,7 @@ async function initAppLogic() {
       /* Create a message saying sign up entry was successfully created and store it.
             It will be displayed on events page */
       storeMessage(
-        `You have sucessfully signed up for the event '${eventObject!["eventTitle"]}'`,
+        `You have successfully  signed up for the event '${eventObject!["eventTitle"]}'`,
         "main-message",
         "check_circle",
       );
