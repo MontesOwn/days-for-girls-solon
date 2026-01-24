@@ -59,7 +59,7 @@ export async function initializeApp(partentPage: string, currentPage: string) {
     if (language) {
       localStorage.setItem('i18nextLng', language);
     } else {
-      localStorage.setItem('i18nextLng', 'en');
+      localStorage.setItem('i18nextLng', 'es');
     }
   }
   //Wait for the DOM to load
