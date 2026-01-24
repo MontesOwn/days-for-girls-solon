@@ -2,29 +2,23 @@ import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { resources } from './translations';
 
-// 2. Initialize i18next
 i18n
   .use(LanguageDetector)
   .init({
     resources,
     fallbackLng: "en",
     interpolation: {
-      escapeValue: false // Not needed for vanilla JS/TS
+      escapeValue: false
     },
     detection: {
       order: ['localStorage', 'navigator'],
-      caches: ['localStorage'] // Remembers user selection on refresh
+      caches: ['localStorage']
     }
   }, (err) => {
     if (err) return console.error(err);
     updateContent();
   });
 
-/**
- * 3. The Helper Function
- * Scans the DOM for any element with 'data-i18n' and updates its text.
- * It also supports passing variables via 'data-i18n-options'.
- */
 export function updateContent() {
   const elements = document.querySelectorAll<HTMLElement>('[data-i18n]');
   
@@ -39,7 +33,6 @@ export function updateContent() {
   });
 }
 
-// 4. Listen for language changes to automatically refresh the UI
 i18n.on('languageChanged', () => {
   updateContent();
 });
