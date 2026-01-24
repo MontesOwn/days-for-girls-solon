@@ -53,17 +53,6 @@ function setUpAuthListener() {
 export async function initializeApp(partentPage: string, currentPage: string) {
   //Set the page title
   document.title = `${currentPage} - Days for Girls Solon`;
-  const language_stored = localStorage.getItem('i18nextLng');
-  if (!language_stored) {
-    const language = getResolvedLanguage();
-    if (language === "en") {
-      localStorage.setItem('i18nextLng', "es");
-    } else if (language === "es") {
-      localStorage.setItem('i18nextLng', "en");
-    } else {
-      localStorage.setItem('i18nextLng', 'es');
-    }
-  }
   //Wait for the DOM to load
   await new Promise<void>((resolve) => {
     if (document.readyState === "loading") {
@@ -82,10 +71,11 @@ export async function initializeApp(partentPage: string, currentPage: string) {
   //Load the modals
   await loadModals();
   const btn = document.getElementById('toggle-btn');
-  btn?.addEventListener('click', () => {
-    const targetLang = i18n.language === 'en' ? 'es' : 'en';
-    i18n.changeLanguage(targetLang);
-    // updateContent() is called automatically because of the listener in i18n.ts
+  btn?.addEventListener('click', async () => {
+    const currentLang = i18n.resolvedLanguage;
+    const targetLang = currentLang === 'en' ? 'es' : 'en';
+    await i18n.changeLanguage(targetLang);
+    console.log(`Language changed to: ${targetLang}`);
   });
   updateContent()
   //Set the page elemenets once the header, footer, and modals are loaded and added to the DOM
