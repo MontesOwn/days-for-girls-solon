@@ -82,7 +82,7 @@ async function loadEvents(userRole: string) {
     noEventsCard.setAttribute("class", "card");
     const noEventsP = document.createElement("p");
     const noEvents = document.createTextNode(
-      "There are currently no upcoming events. Please check back later.",
+      i18n.t('no_events'),
     );
     noEventsP.appendChild(noEvents);
     noEventsCard.appendChild(noEventsP);

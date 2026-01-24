@@ -29,6 +29,7 @@ import { auth } from "./firebase";
 import { User } from "./authService";
 import { getUserRole } from "./authService";
 import { navigateTo } from "./modules/navigate";
+import i18n from './i18n';
 
 //DOM elements
 const mainContent = document.getElementById("maincontent") as HTMLElement;
@@ -49,7 +50,7 @@ async function updateUIbasedOnAuth(user: User | null) {
   const loadingDiv = makeElement("div", "loading", "button-row left", null);
   const loader = makeElement("div", "loader", "loader", null);
   loadingDiv.appendChild(loader);
-  const loadingText = makeElement("h2", "loading", null, "Loading Inventory");
+  const loadingText = makeElement("h2", "loading", null, i18n.t('loading'));
   loadingDiv.appendChild(loadingText);
   currentInventoryCard.appendChild(loadingDiv);
   mainContent.appendChild(currentInventoryCard);
@@ -186,7 +187,7 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
     createMessage(error, "main-message", "error");
     return;
   }
-  const cardHeading = makeElement("h2", "card-heading", null, "Current Inventory");
+  const cardHeading = makeElement("h2", "card-heading", null, i18n.t('current_inventory'));
   currentInventoryCard.appendChild(cardHeading);
 
   if (currrentInventoryArray.length === 0) {
@@ -238,7 +239,7 @@ async function loadCurrentInventory(currentInventoryCard: HTMLElement, userRole:
     const allInventoryButton = createButton("All Inventory", "button", "all-inventory-button", "secondary");
     allInventoryButton.addEventListener('click', () => {
       const oldHeading = document.getElementById("card-heading") as HTMLElement;
-      const newHeading = makeElement("h2", "card-heading", null, "Current Inventory");
+      const newHeading = makeElement("h2", "card-heading", null, i18n.t('current_inventory'));
       currentInventoryCard.replaceChild(newHeading, oldHeading);
       const inventoryArray: LocationItem[] = filterInventoryForLocation("all", currrentInventoryArray);
       createInvetoryTable(inventoryArray, userRole);

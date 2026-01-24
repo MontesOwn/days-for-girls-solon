@@ -28,6 +28,7 @@ import {
 
 } from "./models";
 import { db } from "./firebase";
+import i18n from './i18n';
 
 //Global Firebase Variables
 declare const __app_id: string;
@@ -152,7 +153,7 @@ export async function addEvent(
   } catch (error) {
     console.error("Error adding event:", error);
     if (error instanceof FirebaseError && error.code === "permission-denied") {
-      throw new Error("Authorization Error: Only admins create events.");
+      throw new Error(i18n.t('admins_only_error'));
     } else {
       throw new Error("Error adding event. Please try reloading the page.");
     }
@@ -172,7 +173,7 @@ export async function updateEvent(eventId: string, updatedEvent: Event) {
   } catch (error) {
     console.error("Error updating event:", error);
     if (error instanceof FirebaseError && error.code === "permission-denied") {
-      throw new Error("Authorization Error: Only admins update events.");
+      throw new Error(i18n.t('admins_only_error'));
     } else {
       throw new Error("Error updating event. Please try reloading the page.");
     }
@@ -198,7 +199,7 @@ export async function deleteEvent(eventId: string) {
   } catch (error) {
     console.error("Error deleting event and related sign-up entries:", error);
     if (error instanceof FirebaseError && error.code === "permission-denied") {
-      throw new Error("Authorization Error: Only admins delete events.");
+      throw new Error(i18n.t('admins_only_error'));
     } else {
       throw new Error("Error deleting event. Please try reloading the page.");
     }
@@ -228,7 +229,7 @@ export async function addSignUpEntry(
       //Read the Event document
       const eventSnap = await txn.get(eventRef);
       if (!eventSnap.exists()) {
-        throw new Error(`Event with ID ${eventId} not found. Cannot sign up.`);
+        throw new Error(i18n.t('failed_sign_up_error'));
       }
 
       //Increment numberAttending in the Event
@@ -246,7 +247,7 @@ export async function addSignUpEntry(
   } catch (error) {
     console.error("Error adding sign-up entry (Transaction aborted):", error);
     throw new Error(
-      "Failed to sign up for the event. Please try reloading the page",
+      i18n.t('failed_sign_up_error'),
     );
   }
 }
@@ -388,7 +389,7 @@ export async function getDonatePageContent(): Promise<DonatePageContent | null> 
   } catch (error) {
     console.error("Error fetching donate page content:", error);
     throw new Error(
-      "Failed to load page content. Please try reloading the page.",
+      i18n.t('fail_to_load_content_error'),
     );
   }
 }
@@ -448,7 +449,7 @@ export async function getLocationById(locationId: string): Promise<Location | nu
       return null;
     }
   } catch (error) {
-    console.error("Error fetching locatoin:", error);
+    console.error("Error fetching location:", error);
     throw new Error("Failed to get location. Please try reloading the page.");
   }
 }

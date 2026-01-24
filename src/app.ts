@@ -111,7 +111,7 @@ export async function initializeApp(partentPage: string, currentPage: string) {
       mobileNavToggle.innerText = "menu";
       nav.classList.remove("open");
     }
-    createMessage("Opening Google window...", "main-message", "info");
+    createMessage(i18n.t('app_open_google'), "main-message", "info");
     try {
       const result = await signInWithGooglePopup();
       //If sucessful sign in with Google, close the modal and display the message
@@ -119,17 +119,17 @@ export async function initializeApp(partentPage: string, currentPage: string) {
       if (user) {
         //Close the sign in modal
         createMessage(
-          `Welcome ${user.displayName}`,
+          i18n.t('app_welcome', { name: user.displayName }),
           "main-message",
           "check_circle",
         );
       }
     } catch (error: any) {
-      let errorMessage = "Sign-In failed.";
+      let errorMessage = i18n.t('app_sign_failed');
       if (error.code === "auth/popup-closed-by-user") {
-        errorMessage = "Sign-In window closed.";
+        errorMessage = i18n.t('app_google_closed');
       } else if (error.code === "auth/cancelled-popup-request") {
-        errorMessage = "Sign-In request already in progress.";
+        errorMessage = i18n.t('app_google_already');
       } else {
         errorMessage = `Error: ${error.message}`;
       }
@@ -280,5 +280,5 @@ function signOut() {
     mobileNavToggle.innerText = "menu";
     nav.classList.remove("open");
   }
-  createMessage("Signed Out Successfully", "main-message", "check_circle");
+  createMessage(i18n.t('app_sign_out'), "main-message", "check_circle");
 }

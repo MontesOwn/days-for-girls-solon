@@ -4,6 +4,7 @@ import { initializeApp } from "./app";
 import { SignUpEntry, Event } from "./models";
 import { auth } from "./firebase";
 import { navigateTo } from "./modules/navigate";
+import i18n from './i18n';
 
 //DOM Elements
 const signUpForm = document.getElementById("sign-up-form") as HTMLFormElement;
@@ -20,7 +21,7 @@ async function initAppLogic() {
   if (eventId === "") {
     //If the id is not in the url, store a message and redirect to the events page
     storeMessage(
-      "Error loading event. Please try again.",
+      i18n.t('event_error_loading'),
       "main-message",
       "error",
     );
@@ -40,17 +41,17 @@ async function initAppLogic() {
 
   if (eventObject === null) {
     //If the eventObject is null, create a no event card
-    createMessage("Could not find event", "main-message", "error");
+    createMessage(i18n.t('event_not_found'), "main-message", "error");
     signUpForm.remove();
     let errorCard = document.createElement("section");
     errorCard.setAttribute("class", "card");
     let errorH2 = document.createElement("h2");
-    let errorTite = document.createTextNode("Could not find event");
+    let errorTite = document.createTextNode(i18n.t('event_not_found'));
     errorH2.appendChild(errorTite);
     errorCard.appendChild(errorH2);
     let errorP = document.createElement("p");
     let errorMessage = document.createTextNode(
-      "The event you were looking for does not exist or the url is incorrect. Please go back to the events page and try again.",
+      i18n.t('event_not_found_message'),
     );
     errorP.appendChild(errorMessage);
     errorCard.appendChild(errorP);
@@ -63,7 +64,7 @@ async function initAppLogic() {
     ) as HTMLElement;
     const signUpTitleH2 = document.createElement("h2");
     const signUpTitle = document.createTextNode(
-      `Sign up for ${eventObject["eventTitle"]}`,
+      i18n.t('event_sign_up_for_event', {event: eventObject["eventTitle"]}),
     );
     signUpTitleH2.appendChild(signUpTitle);
     signUpHeader.appendChild(signUpTitleH2);
@@ -97,7 +98,7 @@ async function initAppLogic() {
 
   async function submitData() {
     //Create a submitting data message while the app validates and submits the data
-    createMessage("Submitting entry data...", "main-message", "info");
+    createMessage(i18n.t('event_sumbitting'), "main-message", "info");
     //Get the form data
     const signUpFormData: FormData = new FormData(signUpForm);
     //Create an object for the entry
@@ -110,13 +111,13 @@ async function initAppLogic() {
     //Validate full name input
     const fullNameValue = signUpFormData.get("fullName");
     if (fullNameValue === null || fullNameValue.toString().trim() === "") {
-      createMessage("Please enter your name", "main-message", "error");
+      createMessage(i18n.t('event_name_error'), "main-message", "error");
       return;
     } else {
       let firstLastCheck = fullNameValue.toString().split(" ");
       if (firstLastCheck.length < 2) {
         createMessage(
-          "Please enter your first and last name",
+          i18n.t('event_full_name_error'),
           "main-message",
           "error",
         );
@@ -128,12 +129,12 @@ async function initAppLogic() {
     //Validate email
     const emailValue = signUpFormData.get("email");
     if (emailValue === null || emailValue.toString().trim() === "") {
-      createMessage("Please enter your email", "main-message", "error");
+      createMessage(i18n.t('event_email_error'), "main-message", "error");
       return;
     }
     const checkForAtSymbol = emailValue.toString().split("@");
     if (checkForAtSymbol.length < 2) {
-      createMessage("Please enter a valid email", "main-message", "error");
+      createMessage(i18n.t('event_valid_email_error'), "main-message", "error");
       return;
     } else {
       newSignUp["email"] = emailValue.toString();
@@ -149,7 +150,7 @@ async function initAppLogic() {
       /* Create a message saying sign up entry was successfully created and store it.
             It will be displayed on events page */
       storeMessage(
-        `You have successfully  signed up for the event '${eventObject!["eventTitle"]}'`,
+        i18n.t('event_successfull_sign_up', { event: eventObject!["eventTitle"] }),
         "main-message",
         "check_circle",
       );

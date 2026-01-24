@@ -13,6 +13,7 @@ import Quill from "quill";
 import BlotFormatter from '@enzedonline/quill-blot-formatter2';
 import "quill/dist/quill.snow.css";
 import imageCompression from 'browser-image-compression';
+import i18n from './i18n';
 
 Quill.register('modules/blotFormatter', BlotFormatter);
 
@@ -70,7 +71,7 @@ async function loadDonateContent() {
   if (!donatePageContent) {
     //If there is no page content in the firestore, create a placeholder object
     donatePageContent = {
-      html: "<h2>No Content Found</h2>",
+      html: `<h2>${i18n.t('no_content_found')}</h2>`,
       delta: "",
       lastUpdated: Timestamp.now(),
     };
@@ -81,7 +82,7 @@ async function loadDonateContent() {
   pageContentSection.innerHTML = donatePageContent["html"];
   const lastUpdatedP = document.createElement("p");
   const lastUpdatedText = document.createTextNode(
-    `Last updated: ${fixDate(donatePageContent["lastUpdated"], "longDate")}`,
+    `${i18n.t('last_updated')}: ${fixDate(donatePageContent["lastUpdated"], "longDate")}`,
   );
   lastUpdatedP.appendChild(lastUpdatedText);
   const loadingCard = document.getElementById("loading");
