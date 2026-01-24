@@ -56,8 +56,10 @@ export async function initializeApp(partentPage: string, currentPage: string) {
   const language_stored = localStorage.getItem('i18nextLng');
   if (!language_stored) {
     const language = getResolvedLanguage();
-    if (language) {
-      localStorage.setItem('i18nextLng', language);
+    if (language === "en") {
+      localStorage.setItem('i18nextLng', "es");
+    } else if (language === "es") {
+      localStorage.setItem('i18nextLng', "en");
     } else {
       localStorage.setItem('i18nextLng', 'es');
     }
