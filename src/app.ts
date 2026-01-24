@@ -53,6 +53,15 @@ function setUpAuthListener() {
 export async function initializeApp(partentPage: string, currentPage: string) {
   //Set the page title
   document.title = `${currentPage} - Days for Girls Solon`;
+  const language_stored = localStorage.getItem('i18nextLng');
+  if (!language_stored) {
+    const language = getResolvedLanguage();
+    if (language) {
+      localStorage.setItem('i18nextLng', language);
+    } else {
+      localStorage.setItem('i18nextLng', 'en');
+    }
+  }
   //Wait for the DOM to load
   await new Promise<void>((resolve) => {
     if (document.readyState === "loading") {
