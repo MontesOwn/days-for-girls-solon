@@ -36,7 +36,7 @@
   </head>
 
   <body>
-    <a href="#maincontent" class="skip-link">Skip to main content</a>
+    <a href="#maincontent" class="skip-link" data-i18n="screen_reader_skip">Skip to main content</a>
     <button id="mobile-nav-toggle" class="material-symbols-outlined">
       menu
     </button>
@@ -46,33 +46,33 @@
       <main id="maincontent">
         <section class="button-row left">
           <a href="events.html" class="secondary">
-            <span class="material-symbols-outlined">arrow_back</span> Back to
-            Events</a
+            <span class="material-symbols-outlined">arrow_back</span> <span  data-i18n="back_to_events">Back to
+            Events</span></a
           >
         </section>
         <article id="loading" class="card">
           <div class="loader"></div>
-          <h2>Loading Event Details</h2>
+          <h2  data-i18n="loading">Loading Event Details</h2>
         </article>
         <!--Hide the form with .hide until the page fully loads-->
         <form class="card hide" id="sign-up-form">
           <section id="sign-up-header"></section>
           <section class="form-row">
-            <label for="fullName">Full Name:</label>
+            <label for="fullName" data-i18n="full_name">Full Name:</label>
             <input type="text" id="fullName" name="fullName" />
           </section>
           <section class="form-row">
-            <label for="email">Email:</label>
+            <label for="email" data-i18n="email">Email:</label>
             <input type="text" id="email" name="email" />
           </section>
           <section id="commentsTextArea">
-            <label for="comments">Any comments you would like to add:</label>
+            <label for="comments" data-i18n="any_comments">Any comments you would like to add:</label>
             <br />
             <textarea id="comments" name="comments"></textarea>
           </section>
           <section class="button-row">
-            <button type="reset" class="secondary">Clear Form</button>
-            <button type="submit" class="primary">Submit</button>
+            <button type="reset" class="secondary" data-i18n="clear_form">Clear Form</button>
+            <button type="submit" class="primary" data-i18n="submit">Submit</button>
           </section>
         </form>
       </main>
