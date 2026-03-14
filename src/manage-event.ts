@@ -151,7 +151,7 @@ async function editEventInfo() {
     eventLocation: "",
     eventTime: "",
     eventDescription: "",
-    numberAttending: 0,
+    numberAttending: eventObject["numberAttending"],
   };
   //Validate the event title input
   let TitleValue = formData.get("eventTitle");
