@@ -13,7 +13,7 @@ export async function createQRCodeWithLogo(url: string): Promise<HTMLCanvasEleme
       if (!ctx) return reject(new Error('Could not get 2D context'));
 
       const logo = new Image();
-      logo.src = "https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/refs/heads/main/images/icon.png";
+      logo.src = "https://raw.githubusercontent.com/MontesOwn/days-for-girls-solon/refs/heads/main/images/icon-with-background.png";
       logo.crossOrigin = 'anonymous';
 
       logo.onload = () => {
@@ -43,17 +43,21 @@ initializeApp("Generate", "Generate").then(()=> {
     qrForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(qrForm);
-        const campaignIDInput = formData.get("url-input");
-        let campaignId = ""
-
-        if (!campaignIDInput || campaignIDInput.toString().trim() === "") {
+        const urlInput = formData.get("url-input");
+        let url = ""
+        if (!urlInput || urlInput.toString().trim() === "") {
             createMessage("Please enter the url", "main-message", "error");
             return;
         } else {
-            campaignId = campaignIDInput.toString().trim();
+            url = urlInput.toString().trim();
+        }
+        const nameInput = formData.get("qr-name");
+        if (!nameInput || nameInput.toString().trim() === "") {
+            createMessage("Please give a name for the QR Code", "main-message", "error");
+            return;
         }
         try {
-            const canvas = await createQRCodeWithLogo(campaignId);
+            const canvas = await createQRCodeWithLogo(url);
             qrSection.appendChild(canvas);
             const btnRow = makeElement("div", null, "button-row", null);
             const downloadBtn = createButton("Download QR Code", "button", "download", "accent-button", "download");
@@ -62,7 +66,7 @@ initializeApp("Generate", "Generate").then(()=> {
                     const dataUrl = canvas.toDataURL('image/png');
                     const a = document.createElement('a');
                     a.href = dataUrl;
-                    a.download = `donate-${campaignId}.png`
+                    a.download = `d4g-${nameInput}.png`
                     a.click();
                 } catch (err) {
                     createMessage(`Could not download image: ${err}`, "main-message", "error");
