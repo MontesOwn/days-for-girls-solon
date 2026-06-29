@@ -48,7 +48,7 @@ footer {
   grid-area: footer;
 }
 
-/* Medai breakpoints */
+/* Media breakpoints */
 /* Screens larger than 1044px*/
 @media (min-width: 1045px) {
   #page-wrapper {

@@ -11,7 +11,6 @@ import { getUserRole } from "./authService";
 import { Timestamp } from "firebase/firestore";
 import Quill from "quill";
 import BlotFormatter from '@enzedonline/quill-blot-formatter2';
-import "quill/dist/quill.snow.css";
 import imageCompression from 'browser-image-compression';
 import i18n from './i18n';
 
